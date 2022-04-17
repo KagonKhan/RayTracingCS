@@ -55,11 +55,30 @@ namespace RayTracingCS
             var sb = new System.Text.StringBuilder();
             sb.Append(r + " ");
             sb.Append(g + " ");
-            sb.Append(b);
+            sb.Append(b + " ");
 
             return sb.ToString();
         }
 
+        #region constant colors
+        static public readonly Color red        = new(255, 0, 0);
+        static public readonly Color Black      = new(0,0,0);
+        static public readonly Color White      = new(255,255,255);
+        static public readonly Color Red        = new(255,0,0);
+        static public readonly Color Lime       = new(0,255,0);
+        static public readonly Color Blue       = new(0,0,255);
+        static public readonly Color Yellow     = new(255,255,0);
+        static public readonly Color Cyan       = new(0,255,255);
+        static public readonly Color Magenta    = new(255,0,255);
+        static public readonly Color Silver     = new(192,192,192);
+        static public readonly Color Gray       = new(128,128,128);
+        static public readonly Color Maroon     = new(128,0,0);
+        static public readonly Color Olive      = new(128,128,0);
+        static public readonly Color Green      = new(0,128,0);
+        static public readonly Color Purple     = new(128, 0, 128);
+        static public readonly Color Teal       = new(0,128,128);
+        static public readonly Color Navy       = new(0, 0, 128);
+        #endregion
 
         #region operator overloads
         public static Color operator +(Color a, Color b)
