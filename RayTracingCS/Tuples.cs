@@ -30,6 +30,33 @@ namespace RayTracingCS
             return sb.ToString();
         }
 
+
+        public double this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return x;
+                    case 1: return y;
+                    case 2: return z;
+                    case 3: return w;
+                    default: return x;
+                }
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0: x = value; break;
+                    case 1: y = value; break;
+                    case 2: z = value; break;
+                    case 3: w = value; break;
+                    default: x = value; break;
+                }
+            }
+        }
+
     }
 
     public class Color : Tuple
@@ -55,7 +82,7 @@ namespace RayTracingCS
             var sb = new System.Text.StringBuilder();
             sb.Append(r + " ");
             sb.Append(g + " ");
-            sb.Append(b + " ");
+            sb.Append(b);
 
             return sb.ToString();
         }
@@ -182,7 +209,8 @@ namespace RayTracingCS
     {
         public Vector(double x = 0.0d, double y = 0.0d, double z = 0.0d) : base(x, y, z, 0.0d) { }
 
-    #region operator overloads
+        #region operator overloads
+ 
         public static Vector operator +(Vector a, Vector b)
         {
             Vector retVal = new();

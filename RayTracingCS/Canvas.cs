@@ -17,22 +17,25 @@ namespace RayTracingCS
 
             canvas = new Color[width, height];
 
-            for (int col = 0; col < width; col++)
-                for (int row = 0; row < height; row++)
-                    canvas[col, row] = new Color();
+            for (int row = 0; row < height; row++)
+                for (int col = 0; col < width; col++)
+                    canvas[row, col] = new Color();
 
         }
 
         public void Flush(Color color)
         {
-            for (int col = 0; col < width; col++)
-                for (int row = 0; row < height; row++)
-                    canvas[col, row] = color;
+            for (int row = 0; row < height; row++)
+                for (int col = 0; col < width; col++)
+                    canvas[row, col] = color;
         }
 
         public void WritePixel(int x, int y, Color color)
         {
-            canvas[x, y] = color;
+            if (x >= width || x < 0 || y >= height || y < 0) 
+                return;
+
+            canvas[y, x] = color;
         }
 
         public void ToPPM()
@@ -40,11 +43,11 @@ namespace RayTracingCS
             var sb = new System.Text.StringBuilder();
             sb.Append($"P3\n{width} {height}\n255\n");
 
-            for (int col = 0; col < width; col++)
+            for (int row = 0; row < height; row++)
             {
-                for (int row = 0; row < height; row++)
+                for (int col = 0; col < width; col++)
                 {
-                    sb.Append(canvas[col, row].ToString());
+                    sb.Append(canvas[row, col].ToString());
                 }
                 sb.Append('\n');
             }
