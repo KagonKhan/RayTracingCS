@@ -145,6 +145,11 @@ namespace RayTracingCS.UnitTests
 
 
 
+    }
+
+    public class MatrixTests
+    {
+
 
         [Fact]
         public void MatrixIndexing()
@@ -312,17 +317,17 @@ namespace RayTracingCS.UnitTests
         [Fact]
         public void Matrix4InverseTest()
         {
-            var m = new Mat4(-5,  2,  6, -8,
-                              1, -5,  1,  8,
-                              7,  7, -6, -7,
-                              1, -3,  7,  4);
+            var m = new Mat4(-5, 2, 6, -8,
+                              1, -5, 1, 8,
+                              7, 7, -6, -7,
+                              1, -3, 7, 4);
 
             var b = m.Inverse();
 
-            var res = new Mat4(0.21805 ,  0.45113,  0.24060, -0.04511,
-                               -0.80827, -1.45677, -0.44361,  0.52068,
-                               -0.07895, -0.22368, -0.05263,  0.19737,
-                               -0.52256, -0.81391, -0.30075,  0.30639);
+            var res = new Mat4(0.21805, 0.45113, 0.24060, -0.04511,
+                               -0.80827, -1.45677, -0.44361, 0.52068,
+                               -0.07895, -0.22368, -0.05263, 0.19737,
+                               -0.52256, -0.81391, -0.30075, 0.30639);
 
             Assert.Equal(532d, m.Determinant());
 
@@ -330,11 +335,149 @@ namespace RayTracingCS.UnitTests
             Assert.Equal(-160 / 532d, b[3, 2]);
 
             Assert.Equal(105, m.Cofactor(3, 2));
-            Assert.Equal(105 / 532d, b[2,3]);
+            Assert.Equal(105 / 532d, b[2, 3]);
 
             Assert.True(res == b);
 
 
         }
+
+
+        [Fact]
+        public void TranslationsTest()
+        {
+            var p = new Point(-3, 4, 5);
+            var v = new Vector(-3, 4, 5);
+
+            Assert.True(Mat4.Translation(5, -3, 2) * p == new Point(2, 1, 7));
+            Assert.True(Mat4.Translation(5, -3, 2).Inverse() * p == new Point(-8, 7, 3));
+            Assert.True(Mat4.Translation(5, -3, 2) * v == v);
+        }
+        [Fact]
+        public void ScalingTest()
+        {
+            var p = new Point(-4, 6, 8);
+            var v = new Vector(-4, 6, 8);
+            var ps = new Point(2, 3, 4);
+
+
+            Assert.True(Mat4.Scaling(2, 3, 4) * p == new Point(-8, 18, 32));
+            Assert.True(Mat4.Scaling(2, 3, 4) * v == new Vector(-8, 18, 32));
+            Assert.True(Mat4.Scaling(2, 3, 4).Inverse() * v == new Vector(-2, 2, 2));
+            Assert.True(Mat4.Scaling(-1, 1, 1) * ps == new Point(-2, 3, 4));
+
+        }
+        [Fact]
+        public void RotationTest()
+        {
+            var px = new Point(0, 1, 0);
+            var py = new Point(0, 0, 1);
+            var pz = new Point(0, 1, 0);
+
+            double r22 = Math.Sqrt(2) / 2d;
+
+            Assert.True(Mat4.RotationX(Math.PI / 4) * px == new Point(0, r22, r22));
+            Assert.True(Mat4.RotationX(Math.PI / 4).Inverse() * px == new Point(0, r22, -r22));
+            Assert.True(Mat4.RotationX(Math.PI / 2) * px == new Point(0, 0, 1));
+
+            Assert.True(Mat4.RotationY(Math.PI / 4) * py == new Point(r22, 0, r22));
+            Assert.True(Mat4.RotationY(Math.PI / 2) * py == new Point(1, 0, 0));
+
+            Assert.True(Mat4.RotationZ(Math.PI / 4) * pz == new Point(-r22, r22, 0));
+            Assert.True(Mat4.RotationZ(Math.PI / 2) * pz == new Point(-1, 0, 0));
+
+
+        }
+    }
+
+
+    public class RayTests
+    {
+        [Fact]
+        public void RayCreationTest()
+        {
+            var origin = new Point(1, 2, 3);
+            var direction = new Vector(4, 5, 6);
+            var r = new Ray(origin, direction);
+
+            Assert.Equal(origin, r.origin);
+            Assert.Equal(direction, r.direction);
+        }
+        [Fact]
+        public void RayBehaviorTest()
+        {
+            var origin = new Point(2, 3, 4);
+            var direction = new Vector(1, 0, 0);
+
+            var r = new Ray(origin, direction);
+
+            Assert.Equal(new Point(2, 3, 4), r.position(0));
+            Assert.Equal(new Point(3, 3, 4), r.position(1));
+            Assert.Equal(new Point(1, 3, 4), r.position(-1));
+            Assert.Equal(new Point(4.5, 3, 4), r.position(2.5));
+        }
+        [Fact]
+        public void RaySphereIntersectionTest()
+        {
+            var origin      = new Point (0, 0, -5);
+            var direction   = new Vector(0, 0, 1);
+
+            var r = new Ray(origin, direction);
+            var s = new Sphere(new Point(0,0,0), 1d);
+
+            var intersection = s.intersects(r);
+
+            Assert.Equal(2, intersection.Length);
+            Assert.Equal(4.0, intersection[0].t);
+            Assert.Equal(6.0, intersection[1].t);
+            Assert.IsType<Sphere>(intersection[0].obj);
+
+
+
+            r.origin    = new Point(0, 1, -5);
+            r.direction = new Vector(0, 0, 1);
+
+            intersection = s.intersects(r);
+
+            Assert.Equal(2, intersection.Length);
+            Assert.Equal(5.0, intersection[0].t);
+            Assert.Equal(5.0, intersection[1].t);
+
+
+
+
+            r.origin    = new Point(0, 2, -5);
+            r.direction = new Vector(0, 0, 1);
+
+            intersection = s.intersects(r);
+
+            Assert.Equal(0, intersection.Length);
+
+
+
+
+            r.origin    = new Point(0, 0, 0);
+            r.direction = new Vector(0, 0, 1);
+
+            intersection = s.intersects(r);
+
+            Assert.Equal(2, intersection.Length);
+            Assert.Equal(-1.0, intersection[0].t);
+            Assert.Equal(1.0, intersection[1].t);
+
+
+
+
+            r.origin    = new Point(0, 0, 5);
+            r.direction = new Vector(0, 0, 1);
+
+            intersection = s.intersects(r);
+
+            Assert.Equal(2, intersection.Length);
+            Assert.Equal(-6.0, intersection[0].t);
+            Assert.Equal(-4.0, intersection[1].t);
+
+        }
     }
 }
+

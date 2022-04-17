@@ -8,28 +8,27 @@ namespace RayTracingCS
     {
         static void Main(string[] args)
         {
-            
+
 
             Canvas canvas = new(500, 500);
+            canvas.Flush(Color.Blue);
+
+            var middle  = new Point(250, 250, 0);
+            var top     = new Point(0, 0, 1);
+
+            for (int i = 0; i < 12; i++) { 
+                var point = Mat4.RotationY(i * Math.PI / 6d).Scale(3,3,3) * top;
+                point.x *= 20;
+                point.z *= 20;
+                point.x += 250;
+                point.z += 250;
+                canvas.WritePixel((int)(point.x), (int)(point.z), Color.White);
+            }
 
 
-            var m = new Mat4(-5, 2, 6, -8,
-                              1, -5, 1, 8,
-                              7, 7, -6, -7,
-                              1, -3, 7, 4);
-
-            var b = m.Inverse();
-
-            var res = new Mat4(0.21805, 0.45113, 0.24060, -0.04511,
-                               -0.80827, -1.45677, -0.44361, 0.52068,
-                               -0.07895, -0.22368, -0.05263, 0.19737,
-                               -0.52256, -0.81391, -0.30075, 0.30639);
 
 
-
-            Console.WriteLine(b.ToString());
-            Console.WriteLine(res.ToString());
-            //canvas.ToPPM();
+            canvas.ToPPM();
         }
     }
 }

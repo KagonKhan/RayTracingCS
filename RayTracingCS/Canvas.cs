@@ -32,6 +32,10 @@ namespace RayTracingCS
 
         public void WritePixel(int x, int y, Color color)
         {
+#if DEBUG
+            Console.WriteLine($"Writing to ({x},{y})");
+#endif
+
             if (x >= width || x < 0 || y >= height || y < 0) 
                 return;
 
@@ -47,7 +51,7 @@ namespace RayTracingCS
             {
                 for (int col = 0; col < width; col++)
                 {
-                    sb.Append(canvas[row, col].ToString());
+                    sb.Append(canvas[row, col].ToString() + " ");
                 }
                 sb.Append('\n');
             }

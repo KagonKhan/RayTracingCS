@@ -7,6 +7,75 @@ using System.Threading.Tasks;
 
 namespace RayTracingCS
 {
+
+    public struct Ray
+    {
+        public Point origin;
+        public Vector direction;
+
+        public Ray(Point o, Vector d)
+        {
+            origin = o;
+            direction = d;
+        }
+
+        public Point position(double t)
+        {
+            return direction * t + origin;
+        }
+    }
+
+    
+
+
+
+    public struct Intersection<T>
+    {
+        public T obj;
+        public double t;
+        public Intersection(T obj, double t)
+        {
+            this.obj = obj;
+            this.t = t;
+        }
+    }
+
+
+    public struct Sphere
+    {
+        public Point position;
+        double radius;
+        public Sphere (Point pos, double r)
+        {
+            radius = r;
+            position = pos;
+        }
+
+
+        public Intersection<Sphere>[] intersects (Ray ray)
+        {
+            var sphereToRay = ray.origin - position;
+
+            var a = ray.direction.Dot(ray.direction);
+            var b = 2 * ray.direction.Dot(sphereToRay);
+            var c = sphereToRay.Dot(sphereToRay) - radius;
+
+            var disc = Math.Pow(b, 2) - 4 * a * c;
+
+            if (disc < 0)
+                return Array.Empty<Intersection<Sphere>>();
+            else {
+                var t1 = (-b - Math.Sqrt(disc)) / (2 * a);
+                var t2 = (-b + Math.Sqrt(disc)) / (2 * a);
+
+                var o1 = new Intersection<Sphere>(this, t1);
+                var o2 = new Intersection<Sphere>(this, t2);
+
+                return new Intersection<Sphere>[2] { o1, o2 };
+            }
+        }
+    }
+
     public abstract class Tuple
     {
         public double x, y, z, w;
@@ -86,7 +155,16 @@ namespace RayTracingCS
 
             return sb.ToString();
         }
+        public override bool Equals(Object obj)
+        {
+            if (obj is Color)
+            {
+                var that = obj as Color;
+                return this.r == that.r && this.g == that.g && this.b == that.b;
+            }
 
+            return false;
+        }
         #region constant colors
         static public readonly Color red        = new(255, 0, 0);
         static public readonly Color Black      = new(0,0,0);
@@ -199,8 +277,35 @@ namespace RayTracingCS
             retVal.w = a.w == 0.0d ? a.w : -a.w;
             return retVal;
         }
+        public static bool operator ==(Point a, Point b)
+        {
+            for (int i = 0; i < 4; i++)
+                if (Math.Abs(a[i] - b[i]) > Mat.eps)
+                    return false;
+            return true;
+        }
+        public static bool operator !=(Point a, Point b)
+        {
+            for (int i = 0; i < 4; i++)
+                if (Math.Abs(a[i] - b[i]) > Mat.eps)
+                    return true;
+            return false;
+        }
 
-    #endregion
+        public override bool Equals(Object obj)
+        {
+            if (obj is Point)
+            {
+                var that = obj as Point;
+                return this.x == that.x
+                    && this.y == that.y
+                    && this.z == that.z
+                    && this.w == that.w;
+            }
+
+            return false;
+        }
+        #endregion
 
 
     }
@@ -267,8 +372,36 @@ namespace RayTracingCS
         {
             return a / scalar;
         }
+        public static bool operator ==(Vector a, Vector b)
+        {
+            for (int i = 0; i < 4; i++)
+                if (Math.Abs(a[i] - b[i]) > Mat.eps)
+                    return false;
+            return true;
+        }
+        public static bool operator !=(Vector a, Vector b)
+        {
+            for (int i = 0; i < 4; i++)
+                if (Math.Abs(a[i] - b[i]) > Mat.eps)
+                    return true;
+            return false;
+        }
 
-     #endregion
+        public override bool Equals(Object obj)
+        {
+            if (obj is Vector)
+            {
+                var that = obj as Vector;
+                return this.x == that.x
+                    && this.y == that.y
+                    && this.z == that.z
+                    && this.w == that.w;
+            }
+
+            return false;
+        }
+        #endregion
+
 
         public double Magnitude()
         {

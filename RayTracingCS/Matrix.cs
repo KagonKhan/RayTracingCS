@@ -10,6 +10,8 @@ namespace RayTracingCS
     {
         protected double[,] mat;
         public int dim;
+
+        public static double eps = 0.0001;
         public double this[int row, int col]
         {
             get => mat[row, col];
@@ -49,7 +51,7 @@ namespace RayTracingCS
         {
             for (int row = 0; row < a.dim; row++)
                 for (int col = 0; col < a.dim; col++)
-                    if (!double.Equals(a[row, col], b[row, col]))
+                    if (Math.Abs(a[row,col] - b[row,col]) > eps)
                         return false;
 
             return true;
@@ -318,6 +320,112 @@ namespace RayTracingCS
 
             return retVal;
         }
+
+
+
+
+        public static Mat4 Translation(double x, double y, double z)
+        {
+            return new Mat4(1, 0, 0, x,
+                            0, 1, 0, y,
+                            0, 0, 1, z,
+                            0, 0, 0, 1);
+        }
+        public Mat4 Translate(double x, double y, double z)
+        {
+            return this * new Mat4(1, 0, 0, x,
+                                   0, 1, 0, y,
+                                   0, 0, 1, z,
+                                   0, 0, 0, 1);
+        }
+        public static Mat4 Scaling(double x, double y, double z)
+        {
+            return new Mat4(x, 0, 0, 0,
+                            0, y, 0, 0,
+                            0, 0, z, 0,
+                            0, 0, 0, 1);
+        }
+        public Mat4 Scale(double x, double y, double z)
+        {
+            return this * new Mat4(x, 0, 0, 0,
+                                   0, y, 0, 0,
+                                   0, 0, z, 0,
+                                   0, 0, 0, 1);
+        }
+
+        public static Mat4 Shearing(double Xy = 0, double Xz = 0, double Yx = 0, double Yz = 0, double Zx = 0, double Zy = 0)
+        {
+            return new Mat4(1, Xy, Xz, 0,
+                            Yx, 1, Yz, 0,
+                            Zx, Zy, 1, 0,
+                            0,  0,  0, 1);
+        }
+        public Mat4 Shear(double Xy = 0, double Xz = 0, double Yx = 0, double Yz = 0, double Zx = 0, double Zy = 0)
+        {
+            return this * new Mat4(1, Xy, Xz, 0,
+                                   Yx, 1, Yz, 0,
+                                   Zx, Zy, 1, 0,
+                                   0,  0,  0, 1);
+        }
+
+        public static Mat4 RotationX(double r)
+        {
+            double c = Math.Cos(r), s = Math.Sin(r);
+
+            return new Mat4(1, 0,  0, 0,
+                            0, c, -s, 0,
+                            0, s,  c, 0,
+                            0, 0,  0, 1);
+        }
+        public Mat4 RotateX(double r)
+        {
+            double c = Math.Cos(r), s = Math.Sin(r);
+
+            return this * new Mat4(1, 0,  0, 0,
+                                   0, c, -s, 0,
+                                   0, s,  c, 0,
+                                   0, 0,  0, 1);
+        }
+        public static Mat4 RotationY(double r)
+        {
+            double c = Math.Cos(r), s = Math.Sin(r);
+
+            return new Mat4( c, 0, s, 0,
+                             0, 1, 0, 0,
+                            -s, 0, c, 0,
+                             0, 0, 0, 1);
+        }
+        public Mat4 RotateY(double r)
+        {
+            double c = Math.Cos(r), s = Math.Sin(r);
+
+            return this * new Mat4( c, 0, s, 0,
+                                    0, 1, 0, 0,
+                                   -s, 0, c, 0,
+                                    0, 0, 0, 1);
+        }
+        public static Mat4 RotationZ(double r)
+        {
+            double c = Math.Cos(r), s = Math.Sin(r);
+
+            return new Mat4(c, -s, 0, 0,
+                            s,  c, 0, 0,
+                            0,  0, 0, 0,
+                            0,  0, 0, 1);
+        }
+
+        
+        public Mat4 RotateZ(double r)
+        {
+            double c = Math.Cos(r), s = Math.Sin(r);
+
+            return this * new Mat4(c, -s, 0, 0,
+                                   s,  c, 0, 0,
+                                   0,  0, 0, 0,
+                                   0,  0, 0, 1);
+        }
+
+
     }
 
 
