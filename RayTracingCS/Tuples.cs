@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace RayTracingCS
 {
     public abstract class Tuple
@@ -36,6 +37,8 @@ namespace RayTracingCS
     public class Point : Tuple
     {
         public Point(double x = 0.0d, double y = 0.0d, double z = 0.0d) : base(x, y, z, 1.0d) { }
+
+    #region operator overloads
         public static Point operator +(Point a, Vector b)
         {
             Point retVal = new();
@@ -81,12 +84,17 @@ namespace RayTracingCS
             retVal.w = a.w == 0.0d ? a.w : -a.w;
             return retVal;
         }
+
+    #endregion
+
+
     }
 
     public class Vector : Tuple
     {
         public Vector(double x = 0.0d, double y = 0.0d, double z = 0.0d) : base(x, y, z, 0.0d) { }
 
+    #region operator overloads
         public static Vector operator +(Vector a, Vector b)
         {
             Vector retVal = new();
@@ -143,5 +151,39 @@ namespace RayTracingCS
         {
             return a / scalar;
         }
+
+     #endregion
+
+        public double Magnitude()
+        {
+            double sum = Math.Pow(this.x, 2) + Math.Pow(this.y, 2) + Math.Pow(this.z, 2) + Math.Pow(this.w, 2);
+            return Math.Sqrt(sum);
+        }
+        public Vector Normalize()
+        {
+            Vector retVal = new();
+            double mag = Magnitude();
+
+            retVal.x = x / mag;
+            retVal.y = y / mag;
+            retVal.z = z / mag;
+            retVal.w = w / mag;
+
+            return retVal;
+        }
+        public double Dot(Vector b)
+        {
+            return  x * b.x +
+                    y * b.y +
+                    z * b.z +
+                    w * b.w;
+        }
+        public Vector Cross(Vector b)
+        {
+            return new Vector(y * b.z - z * b.y,
+                              z * b.x - x * b.z,
+                              x * b.y - y * b.x);
+        }
+
     }
 }

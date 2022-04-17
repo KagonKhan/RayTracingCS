@@ -1,6 +1,6 @@
 using Xunit;
 using RayTracingCS;
-
+using System;
 
 namespace RayTracingCS.UnitTests
 {
@@ -81,6 +81,36 @@ namespace RayTracingCS.UnitTests
         {
             var v = new Vector(1, -2, 3);
             Assert.Equal("0,5 -1 1,5 0", (v/2).ToString());
+        }
+
+
+        [Fact]
+        public void VectorMagnitudeTest()
+        {
+            var v = new Vector(-1, -2, -3);
+            Assert.Equal(Math.Sqrt(14), v.Magnitude());
+        }
+        [Fact]
+        public void VectorNormalizationTest()
+        {
+            var v = new Vector(4, 0, 0);
+            Assert.Equal("1 0 0 0", (v.Normalize()).ToString());
+            Assert.Equal(1.0d, (v.Normalize()).Magnitude());
+        }
+        [Fact]
+        public void VectorDotTest()
+        {
+            var v1 = new Vector(1, 2, 3);
+            var v2 = new Vector(2, 3, 4);
+            Assert.Equal(20.0d, v1.Dot(v2));
+        }
+        [Fact]
+        public void VectorCrossTest()
+        {
+            var v1 = new Vector(1, 2, 3);
+            var v2 = new Vector(2, 3, 4);
+            Assert.Equal("-1 2 -1 0", v1.Cross(v2).ToString());
+            Assert.Equal("1 -2 1 0", v2.Cross(v1).ToString());
         }
 
 
