@@ -114,5 +114,34 @@ namespace RayTracingCS.UnitTests
         }
 
 
+
+
+        [Fact]
+        public void ColorCreationTest()
+        {
+            var c = new Color(0.2, 0.3, 0.4);
+            Assert.Equal("0,4 0,6 0,8", (2*c).ToString());
+        }
+        [Fact]
+        public void ColorMultiplicationTest()
+        {
+            var c = new Color(-0.5, 0.4, 1.7);
+            Assert.Equal("-0,5 0,4 1,7", c.ToString());
+        }
+        [Fact]
+        public void ColorAdditionTest()
+        {
+            var c1 = new Color(0.9, 0.6, 0.75);
+            var c2 = new Color(0.7, 0.1, 0.25);
+            Assert.Equal("1,6 0,7 1", (c1+c2).ToString());
+        }
+        [Fact]
+        public void ColorSubtractionTest()
+        {
+            var c1 = new Color(0.9, 0.6, 0.75);
+            var c2 = new Color(0.7, 0.1, 0.25);
+            Assert.Equal($"{0.9d-0.7d} 0,5 0,5", (c1 - c2).ToString());
+        }
+
     }
 }

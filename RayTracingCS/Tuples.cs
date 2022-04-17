@@ -32,6 +32,75 @@ namespace RayTracingCS
 
     }
 
+    public class Color : Tuple
+    {
+        private double x, y, z, w;
+        public double r {
+            get => base.x;
+            set => base.x = value;
+        }
+        public double g {
+            get => base.y;
+            set => base.y = value;
+        }
+        public double b {
+            get => base.z;
+            set => base.z = value;
+        }
+
+        public Color(double r = 0.0d, double g = 0.0d, double b = 0.0d) : base(r, g, b, 1.0d) { }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append(r + " ");
+            sb.Append(g + " ");
+            sb.Append(b);
+
+            return sb.ToString();
+        }
+
+
+        #region operator overloads
+        public static Color operator +(Color a, Color b)
+        {
+            Color retVal = new();
+            retVal.r = a.r + b.r;
+            retVal.g = a.g + b.g;
+            retVal.b = a.b + b.b;
+            return retVal;
+        }
+        public static Color operator -(Color a, Color b)
+        {
+            Color retVal = new();
+            retVal.r = a.r - b.r;
+            retVal.g = a.g - b.g;
+            retVal.b = a.b - b.b;
+            return retVal;
+        }
+        public static Color operator *(Color a, double scalar)
+        {
+            Color retVal = new();
+            retVal.r = a.r * scalar;
+            retVal.g = a.g * scalar;
+            retVal.b = a.b * scalar;
+            return retVal;
+        }
+        public static Color operator *(double scalar, Color a)
+        {
+            return a * scalar;
+        }
+        public static Color operator *(Color a, Color b)
+        {
+            Color retVal = new();
+            retVal.r = a.r * b.r;
+            retVal.g = a.g * b.g;
+            retVal.b = a.b * b.b;
+            return retVal;
+        }
+
+        #endregion
+    }
 
 
     public class Point : Tuple
