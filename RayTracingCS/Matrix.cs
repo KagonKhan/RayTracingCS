@@ -303,22 +303,45 @@ namespace RayTracingCS
             return Determinant() != 0;
         }
 
+        public static Mat4 InverseV2(Mat4 a)
+        {
+            Mat4 retVal = Mat4.I;
+
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    if (j != i)
+                    {
+                        double ratio = a[j, i] / a[i, i];
+                        for (int k = 0; k < 4; k++)
+                        {
+                            a[j, k] -= a[i, k] * ratio;
+                            retVal[j, k] -= retVal[i, k] * ratio;
+                        }
+                    }
+
+            for (int i = 0; i < 4; i++)
+            {
+                double temp = 1 / a[i, i];
+
+                for (int j = 0; j < 4; j++)
+                    retVal[i, j] = retVal[i, j] * temp;
+
+            }
+
+            return retVal;
+        }
+
         public Mat4 Inverse()
         {
+
+
+
             if (!Inversible())
                 throw new ArithmeticException("Matrix non inversible");
 
-            Mat4 retVal = new Mat4();
+            return Mat4.InverseV2(this);
 
-            double det = Determinant();
-
-            for (int row = 0; row < 4; row++)
-                for (int col = 0; col < 4; col++)
-                {
-                    retVal[col, row] = Cofactor(row, col) / det;
-                }
-
-            return retVal;
+            
         }
 
 
@@ -425,7 +448,7 @@ namespace RayTracingCS
                                    0,  0, 0, 1);
         }
 
-
+        
     }
 
 

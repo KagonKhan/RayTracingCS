@@ -4,12 +4,20 @@ using System.Threading;
 
 namespace RayTracingCS
 {
+
+   
     class Program
     {
+
+
+       
+
+
+
         static void Main(string[] args)
         {
 
-            var canvas_pixels = 1000;
+            var canvas_pixels = 50;
             Canvas canvas = new(canvas_pixels, canvas_pixels);
             canvas.Flush(Color.Black);
 
@@ -26,6 +34,15 @@ namespace RayTracingCS
 
             var empty_xs = new Intersection<Sphere>();
             var r = new Ray(ray_origin, (new Point(0,0,0) - ray_origin).Normalize());
+
+
+
+
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+
+            
 
             for (int x = 0; x < canvas_pixels; x++) 
             {
@@ -48,8 +65,13 @@ namespace RayTracingCS
 
                 }
             }
-
             
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+            Console.WriteLine(elapsedMs);
+
+
+
             canvas.ToPPM();
 
 
@@ -63,22 +85,31 @@ namespace RayTracingCS
 
 
 
-/*                      Benchmarking v1
+/*                      Benchmarking v1 (10 GB mem)
  *                      
  * Canvas size     10000    1000    500     250     100     50
  * Time[ms]        35min    12042   4100    900     160     50
  * 
  * 
  * 
- *                      Benchmarking v2
+ *                      Benchmarking v2 (everything ref structed, mult optimizations, arg in opt, 2.5 GB mem)
  * Canvas size     10000    1000    500     250     100     50
  * Time[ms]         7min    5299   1700     430      86     40                        
- *                      Benchmarking v3
- * Canvas size
- * Time
- *                      Benchmarking v4
- * Canvas size
- * Time
+ * 
+ * 
+ * 
+ *                      Benchmarking v3 (compared to V1 - new inverse method - checks, 10GB mem)
+ * Canvas size     10000    1000    500     250     100     50
+ * Time[ms]         5min    3500   1050     240      55     27  
+ * 
+ * 
+ *                      Benchmarking v4 (compared to V1 - new inverse method - no checks, 9GB mem)
+ * Canvas size     10000    1000    500     250     100     50
+ * Time[ms]         2min    1600   500     115      30     <20  
+ * 
+ * 
+ * 
+ * 
  *                      Benchmarking v5
  * Canvas size
  * Time

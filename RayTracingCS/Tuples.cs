@@ -28,8 +28,6 @@ namespace RayTracingCS
         {
             return new Ray(transformation * origin, transformation * direction);
         }
-
-
     }
 
     public struct Intersection<T>
