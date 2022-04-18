@@ -23,14 +23,14 @@ namespace RayTracingCS
 
         }
 
-        public void Flush(Color color)
+        public void Flush(in Color color)
         {
             for (int row = 0; row < height; row++)
                 for (int col = 0; col < width; col++)
                     canvas[row, col] = color;
         }
 
-        public void WritePixel(int x, int y, Color color)
+        public void WritePixel(int x, int y, in Color color)
         {
 #if DEBUG
             Console.WriteLine($"Writing to ({x},{y})");

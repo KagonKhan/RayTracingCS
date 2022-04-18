@@ -17,7 +17,8 @@ namespace RayTracingCS
         static void Main(string[] args)
         {
 
-            var canvas_pixels = 50;
+
+            var canvas_pixels = 1000;
             Canvas canvas = new(canvas_pixels, canvas_pixels);
             canvas.Flush(Color.Black);
 
@@ -32,17 +33,12 @@ namespace RayTracingCS
             //s.Transformation = Mat4.Scaling(250, 250, 1);
 
 
-            var empty_xs = new Intersection<Sphere>();
-            var r = new Ray(ray_origin, (new Point(0,0,0) - ray_origin).Normalize());
-
-
-
+            var empty_xs = new Intersection();
+            var r = new Ray(ray_origin, (new Point(0,0,0) - ray_origin).Normalized());
 
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-
-            
 
             for (int x = 0; x < canvas_pixels; x++) 
             {
@@ -52,11 +48,11 @@ namespace RayTracingCS
                     var world_x = -half + pixel_size * x;
                     var pos = new Point(world_x, world_y, wall_z);
 
-                    r.direction = (pos - ray_origin).Normalize();
+                    r.direction = (pos - ray_origin).Normalized();
 
 
                     var xs = s.intersects(r);
-                    if (!Intersection<Sphere>.Hit(xs).Equals(empty_xs))
+                    if (!Intersection.Hit(xs).Equals(empty_xs))
                         canvas.WritePixel(x, y, Color.Red);
 
 
@@ -110,10 +106,14 @@ namespace RayTracingCS
  * 
  * 
  * 
- *                      Benchmarking v5
- * Canvas size
- * Time
- *                      Benchmarking v6
+ *                      Benchmarking v5 2.5GB
+ * Canvas size     10000    1000    500     250     100     50
+ * Time[ms]         50s
+ * 
+ * 
+ * 
+ * 
+ *                      Benchmarking v6 inverse loop unroll 
  * Canvas size
  * Time
  * 

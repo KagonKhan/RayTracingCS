@@ -8,65 +8,49 @@ namespace RayTracingCS
 {
     public abstract class Mat
     {
-        protected double[,] mat;
-        public int dim;
+        protected double[] mat;
+        public readonly int dim;
 
-        public static double eps = 0.0001;
+        public static readonly double eps = 0.0001;
         public double this[int row, int col]
         {
-            get => mat[row, col];
-            set => mat[row, col] = value;
+            get => mat[row * dim + col];
+            set => mat[row * dim + col] = value;
         }
 
-        protected Mat(int dim)
+        protected Mat(in int dim)
         {
-            mat = new double[dim, dim];
+            mat = new double[dim * dim];
             this.dim = dim;
-
-
-            for (int col = 0; col < dim; col++)
-                for (int row = 0; row < dim; row++)
-                    mat[col, row] = 0;
         }
-        protected Mat() { }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
-
             for (int row = 0; row < dim; row++)
             {
                 for (int col = 0; col < dim; col++)
-                {
-                    sb.Append(mat[row, col] + " ");
-                }
+                    sb.Append(mat[row * dim + col] + " ");
+
                 sb.Append('\n');
             }
-
             return sb.ToString();
         }
 
-
-        public static bool operator==(Mat a, Mat b)
+        public override bool Equals(Object obj)
         {
-            for (int row = 0; row < a.dim; row++)
-                for (int col = 0; col < a.dim; col++)
-                    if (Math.Abs(a[row,col] - b[row,col]) > eps)
-                        return false;
+            if (obj is Mat m)
+            {
+                for (int row = 0; row < dim; row++)
+                    for (int col = 0; col < dim; col++)
+                        if (Math.Abs(m[row, col] - this[row, col]) > eps)
+                            return false;
 
-            return true;
-        }
-        public static bool operator!=(Mat a, Mat b)
-        {
-            for (int row = 0; row < a.dim; row++)
-                for (int col = 0; col < a.dim; col++)
-                    if (!double.Equals(a[row, col], b[row, col]))
-                        return true;
+                return true;
+            }
 
             return false;
         }
-
-        
 
     }
 
@@ -77,31 +61,26 @@ namespace RayTracingCS
 
         public Mat2() : base(2) { }
         public Mat2(double a, double b,
-                    double c, double d)
+                    double c, double d) : base(2)
         {
-            dim = 2;
-            mat = new double[2, 2]
-            {
-                { a, b },
-                { c, d }
-            };
+            mat[0] = a;
+            mat[1] = b;
+            mat[2] = c;
+            mat[3] = d;
         }
 
-        public static Mat2 operator *(Mat2 a, Mat2 b)
+        public static Mat2 operator *(in Mat2 a, in Mat2 b)
         {
-            Mat2 retVal = new Mat2();
+            double v1 = a[0, 0] * b[0, 0] + a[0, 1] * b[1, 0];
+            double v2 = a[0, 0] * b[0, 1] + a[0, 1] * b[1, 1];
+            double v3 = a[1, 0] * b[0, 0] + a[1, 1] * b[1, 0];
+            double v4 = a[1, 0] * b[0, 1] + a[1, 1] * b[1, 1];
 
-            for (int row = 0; row < 2; row++)
-                for (int col = 0; col < 2; col++)
-                    retVal[row, col] = a[row, 0] * b[0, col] +
-                                       a[row, 1] * b[1, col];
-
-            return retVal;
+            return new Mat2(v1, v2, v3, v4);
         }
-
-        public double Determinant()
+        public double Det()
         {
-            return mat[0, 0] * mat[1, 1] - mat[0, 1] * mat[1, 0];
+            return mat[0] * mat[3] - mat[1] * mat[2];
         }
     }
 
@@ -114,30 +93,31 @@ namespace RayTracingCS
         public Mat3() : base(3) { }
         public Mat3(double a, double b, double c,
                     double d, double e, double f,
-                    double g, double h, double i)
+                    double g, double h, double i) : base(3)
         {
-            dim = 3;
-            mat = new double[3, 3]
-            {
-                { a, b, c },
-                { d, e, f },
-                { g, h, i }
-            };
+            mat[0] = a;  mat[1] = b;  mat[2] = c;
+            mat[3] = d;  mat[4] = e;  mat[5] = f;
+            mat[6] = g;  mat[7] = h;  mat[8] = i;
         }
 
-        public static Mat3 operator *(Mat3 a, Mat3 b)
+        public static Mat3 operator *(in Mat3 a, in Mat3 b)
         {
-            Mat3 retVal = new Mat3();
+            double v1 = a[0, 0] * b[0, 0] + a[0, 1] * b[1, 0] + a[0, 2] * b[2, 0];
+            double v2 = a[0, 0] * b[0, 1] + a[0, 1] * b[1, 1] + a[0, 2] * b[2, 1];
+            double v3 = a[0, 0] * b[0, 2] + a[0, 1] * b[1, 2] + a[0, 2] * b[2, 2];
 
-            for (int row = 0; row < 3; row++)
-                for (int col = 0; col < 3; col++)
-                    retVal[row, col] = a[row, 0] * b[0, col] +
-                                       a[row, 1] * b[1, col] +
-                                       a[row, 2] * b[2, col];
+            double v4 = a[1, 0] * b[0, 0] + a[1, 1] * b[1, 0] + a[1, 2] * b[2, 0];
+            double v5 = a[1, 0] * b[0, 1] + a[1, 1] * b[1, 1] + a[1, 2] * b[2, 1];
+            double v6 = a[1, 0] * b[0, 2] + a[1, 1] * b[1, 2] + a[1, 2] * b[2, 2];
 
-            return retVal;
+            double v7 = a[2, 0] * b[0, 0] + a[2, 1] * b[1, 0] + a[2, 2] * b[2, 0];
+            double v8 = a[2, 0] * b[0, 1] + a[2, 1] * b[1, 1] + a[2, 2] * b[2, 1];
+            double v9 = a[2, 0] * b[0, 2] + a[2, 1] * b[1, 2] + a[2, 2] * b[2, 2];
+
+            return new Mat3(v1, v2, v3, v4, v5, v6, v7, v8, v9);
         }
 
+        // unoptimized
         public Mat2 Sub(int r, int c)
         {
             Mat2 retVal = new Mat2();
@@ -152,34 +132,28 @@ namespace RayTracingCS
                     if (col == c)
                         continue;
 
-                    retVal[rIndex, cIndex] = mat[row, col];
+                    retVal[rIndex, cIndex] = this[row, col];
 
                     cIndex++;
                 }
                 rIndex++;
             }
-
             return retVal;
         }
-
         public double Minor(int r, int c)
         {
-            return Sub(r, c).Determinant();
+            return Sub(r, c).Det();
         }
-
         public double Cofactor(int r, int c)
         {
-            if ((r + c) % 2 == 0)
-                return Minor(r, c);
-            else
-                return -Minor(r, c);
-
+            return (r + c) % 2 == 0?  Minor(r, c) : -Minor(r, c);
         }
-
         public double Determinant()
         {
-            return mat[0, 0] * Cofactor(0, 0) + mat[0, 1] * Cofactor(0, 1) + mat[0, 2] * Cofactor(0, 2);
+            return mat[0] * Cofactor(0, 0) + mat[1] * Cofactor(0, 1) + mat[2] * Cofactor(0, 2);
         }
+
+
     }
 
     public class Mat4 : Mat
@@ -193,68 +167,79 @@ namespace RayTracingCS
         public Mat4(double a, double b, double c, double d,
                     double e, double f, double g, double h,
                     double i, double j, double k, double l,
-                    double m, double n, double o, double p)
+                    double m, double n, double o, double p) : base(4)
         {
-            dim = 4;
-            mat = new double[4, 4]
-            {
-                { a, b, c, d },
-                { e, f, g, h },
-                { i, j, k, l },
-                { m, n, o, p }
-            };
+            mat[0]  = a;  mat[1]  = b;  mat[2]  = c;  mat[3]  = d;
+            mat[4]  = e;  mat[5]  = f;  mat[6]  = g;  mat[7]  = h;
+            mat[8]  = i;  mat[9]  = j;  mat[10] = k;  mat[11] = l;
+            mat[12] = m;  mat[13] = n;  mat[14] = o;  mat[15] = p;
+        }
+        public Mat4(int zero) : base(4){}
+        public Mat4(Mat4 copy) : base(4)
+        {
+            for (int row = 0; row < 4; row++)
+                for (int col= 0; col< 4; col++) 
+                    this[row, col] = copy[row, col];
         }
 
-
-        public static Mat4 operator *(Mat4 a, Mat4 b)
+        public static Mat4 operator *(in Mat4 a, in Mat4 b)
         {
-            Mat4 retVal = new Mat4();
+            double v1 = a[0, 0] * b[0, 0] + a[0, 1] * b[1, 0] + a[0, 2] * b[2, 0] + a[0, 3] * b[3, 0];
+            double v2 = a[0, 0] * b[0, 1] + a[0, 1] * b[1, 1] + a[0, 2] * b[2, 1] + a[0, 3] * b[3, 1];
+            double v3 = a[0, 0] * b[0, 2] + a[0, 1] * b[1, 2] + a[0, 2] * b[2, 2] + a[0, 3] * b[3, 2];
+            double v4 = a[0, 0] * b[0, 3] + a[0, 1] * b[1, 3] + a[0, 2] * b[2, 3] + a[0, 3] * b[3, 3];
 
+            double v5 = a[1, 0] * b[0, 0] + a[1, 1] * b[1, 0] + a[1, 2] * b[2, 0] + a[1, 3] * b[3, 0];
+            double v6 = a[1, 0] * b[0, 1] + a[1, 1] * b[1, 1] + a[1, 2] * b[2, 1] + a[1, 3] * b[3, 1];
+            double v7 = a[1, 0] * b[0, 2] + a[1, 1] * b[1, 2] + a[1, 2] * b[2, 2] + a[1, 3] * b[3, 2];
+            double v8 = a[1, 0] * b[0, 3] + a[1, 1] * b[1, 3] + a[1, 2] * b[2, 3] + a[1, 3] * b[3, 3];
+
+            double v9 = a[2, 0] * b[0, 0] + a[2, 1] * b[1, 0] + a[2, 2] * b[2, 0] + a[2, 3] * b[3, 0];
+            double v10 = a[2, 0] * b[0, 1] + a[2, 1] * b[1, 1] + a[2, 2] * b[2, 1] + a[2, 3] * b[3, 1];
+            double v11 = a[2, 0] * b[0, 2] + a[2, 1] * b[1, 2] + a[2, 2] * b[2, 2] + a[2, 3] * b[3, 2];
+            double v12 = a[2, 0] * b[0, 3] + a[2, 1] * b[1, 3] + a[2, 2] * b[2, 3] + a[2, 3] * b[3, 3];
+
+            double v13 = a[3, 0] * b[0, 0] + a[3, 1] * b[1, 0] + a[3, 2] * b[2, 0] + a[3, 3] * b[3, 0];
+            double v14 = a[3, 0] * b[0, 1] + a[3, 1] * b[1, 1] + a[3, 2] * b[2, 1] + a[3, 3] * b[3, 1];
+            double v15 = a[3, 0] * b[0, 2] + a[3, 1] * b[1, 2] + a[3, 2] * b[2, 2] + a[3, 3] * b[3, 2];
+            double v16 = a[3, 0] * b[0, 3] + a[3, 1] * b[1, 3] + a[3, 2] * b[2, 3] + a[3, 3] * b[3, 3];
+
+
+            return new Mat4(v1,  v2,  v3,  v4,
+                            v5,  v6,  v7,  v8,
+                            v9,  v10, v11, v12,
+                            v13, v14, v15, v16);
+        }
+
+        public static Vector operator *(in Mat4 a, in Vector b)
+        {
+            double v1 = a[0, 0] * b[0] + a[0, 1] * b[1] + a[0, 2] * b[2] + a[0, 3] * b[3];
+            double v2 = a[1, 0] * b[0] + a[1, 1] * b[1] + a[1, 2] * b[2] + a[1, 3] * b[3];
+            double v3 = a[2, 0] * b[0] + a[2, 1] * b[1] + a[2, 2] * b[2] + a[2, 3] * b[3];
+            double v4 = a[3, 0] * b[0] + a[3, 1] * b[1] + a[3, 2] * b[2] + a[3, 3] * b[3];
+
+            return new Vector(v1, v2, v3, v4);
+        }
+
+        public static Point operator *(in Mat4 a, in Point b)
+        {
+            double v1 = a[0, 0] * b[0] + a[0, 1] * b[1] + a[0, 2] * b[2] + a[0, 3] * b[3];
+            double v2 = a[1, 0] * b[0] + a[1, 1] * b[1] + a[1, 2] * b[2] + a[1, 3] * b[3];
+            double v3 = a[2, 0] * b[0] + a[2, 1] * b[1] + a[2, 2] * b[2] + a[2, 3] * b[3];
+            double v4 = a[3, 0] * b[0] + a[3, 1] * b[1] + a[3, 2] * b[2] + a[3, 3] * b[3];
+
+            return new Point(v1, v2, v3, v4);
+        }
+        // unoptimized
+        public Mat4 Transposed()
+        {
+            Mat4 retVal = new Mat4(0);
             for (int row = 0; row < 4; row++)
                 for (int col = 0; col < 4; col++)
-                    retVal[row, col] = a[row, 0] * b[0, col] +
-                                       a[row, 1] * b[1, col] +
-                                       a[row, 2] * b[2, col] +
-                                       a[row, 3] * b[3, col];
+                    retVal[col, row] = this[row, col];
 
             return retVal;
         }
-
-        public static Vector operator *(Mat4 a, Vector b)
-        {
-            Vector retVal = new Vector();
-
-            for (int row = 0; row < 4; row++)
-                retVal[row] = a[row, 0] * b[0] +
-                              a[row, 1] * b[1] +
-                              a[row, 2] * b[2] +
-                              a[row, 3] * b[3];
-
-            return retVal;
-        }
-        public static Point operator *(Mat4 a, Point b)
-        {
-            Point retVal = new Point();
-
-            for (int row = 0; row < 4; row++)
-                retVal[row] = a[row, 0] * b[0] +
-                              a[row, 1] * b[1] +
-                              a[row, 2] * b[2] +
-                              a[row, 3] * b[3];
-
-            return retVal;
-        }
-
-        public Mat4 Transpose()
-        {
-            Mat4 retVal = new();
-            for (int row = 0; row < 4; row++)
-                for (int col = 0; col < 4; col++)
-                    retVal[col, row] = mat[row, col];
-
-            return retVal;
-        }
-
         public Mat3 Sub(int r, int c)
         {
             Mat3 retVal = new Mat3();
@@ -269,7 +254,7 @@ namespace RayTracingCS
                     if (col == c)
                         continue;
                     
-                    retVal[rIndex, cIndex] = mat[row, col];
+                    retVal[rIndex, cIndex] = this[row, col];
 
                     cIndex++;
                 }
@@ -278,129 +263,117 @@ namespace RayTracingCS
 
             return retVal;
         }
-
         public double Minor(int r, int c)
         {
             return Sub(r, c).Determinant();
         }
-
         public double Cofactor(int r, int c)
         {
-            if ((r + c) % 2 == 0)
-                return Minor(r, c);
-            else
-                return -Minor(r, c);
-
+                return (r + c) % 2 == 0? Minor(r, c) : -Minor(r, c);
         }
-
         public double Determinant()
         {
-            return mat[0, 0] * Cofactor(0, 0) + mat[0, 1] * Cofactor(0, 1) + mat[0, 2] * Cofactor(0, 2) + mat[0,3] * Cofactor(0,3);
+            return mat[0] * Cofactor(0, 0) + mat[1] * Cofactor(0, 1) + mat[2] * Cofactor(0, 2) + mat[3] * Cofactor(0,3);
         }
-
         public bool Inversible()
         {
             return Determinant() != 0;
         }
 
-        public static Mat4 InverseV2(Mat4 a)
+        // Copies original matrix
+        public Mat4 GetInverse(bool checkIfProper = false)
         {
-            Mat4 retVal = Mat4.I;
+            Mat4 retVal = new Mat4(I);
+            Mat4 a      = new Mat4(this);
 
             for (int i = 0; i < 4; i++)
                 for (int j = 0; j < 4; j++)
                     if (j != i)
                     {
                         double ratio = a[j, i] / a[i, i];
-                        for (int k = 0; k < 4; k++)
-                        {
-                            a[j, k] -= a[i, k] * ratio;
-                            retVal[j, k] -= retVal[i, k] * ratio;
-                        }
+                        a[j, 0] -= a[i, 0] * ratio;
+                        a[j, 1] -= a[i, 1] * ratio;
+                        a[j, 2] -= a[i, 2] * ratio;
+                        a[j, 3] -= a[i, 3] * ratio;
+
+                        retVal[j, 0] -= retVal[i, 0] * ratio;
+                        retVal[j, 1] -= retVal[i, 1] * ratio;
+                        retVal[j, 2] -= retVal[i, 2] * ratio;
+                        retVal[j, 3] -= retVal[i, 3] * ratio;
                     }
 
             for (int i = 0; i < 4; i++)
             {
                 double temp = 1 / a[i, i];
+                retVal[i, 0] = retVal[i, 0] * temp;
+                retVal[i, 1] = retVal[i, 1] * temp;
+                retVal[i, 2] = retVal[i, 2] * temp;
+                retVal[i, 3] = retVal[i, 3] * temp;
 
+            }
+
+            return retVal;
+        }
+        // Destroys original matrix
+        public Mat4 Inverse(bool checkIfProper = false)
+        {
+            if (checkIfProper && !Inversible())
+                throw new ArithmeticException("Matrix not inversible");
+
+            Mat4 retVal = new Mat4(I);
+
+            for (int i = 0; i < 4; i++)
                 for (int j = 0; j < 4; j++)
-                    retVal[i, j] = retVal[i, j] * temp;
+                    if (j != i)
+                    {
+                        double ratio = this[j, i] / this[i, i];
+                        this[j, 0] -= this[i, 0] * ratio;
+                        this[j, 1] -= this[i, 1] * ratio;
+                        this[j, 2] -= this[i, 2] * ratio;
+                        this[j, 3] -= this[i, 3] * ratio;
+
+                        retVal[j, 0] -= retVal[i, 0] * ratio;
+                        retVal[j, 1] -= retVal[i, 1] * ratio;
+                        retVal[j, 2] -= retVal[i, 2] * ratio;
+                        retVal[j, 3] -= retVal[i, 3] * ratio;
+                    }
+
+            for (int i = 0; i < 4; i++)
+            {
+                double temp = 1 / this[i, i];
+                retVal[i, 0] = retVal[i, 0] * temp;
+                retVal[i, 1] = retVal[i, 1] * temp;
+                retVal[i, 2] = retVal[i, 2] * temp;
+                retVal[i, 3] = retVal[i, 3] * temp;
 
             }
 
             return retVal;
         }
 
-        public Mat4 Inverse()
-        {
 
-
-
-            if (!Inversible())
-                throw new ArithmeticException("Matrix non inversible");
-
-            return Mat4.InverseV2(this);
-
-            
-        }
-
-
-
-
-        public static Mat4 Translation(double x, double y, double z)
-        {
-            return new Mat4(1, 0, 0, x,
-                            0, 1, 0, y,
-                            0, 0, 1, z,
-                            0, 0, 0, 1);
-        }
-        public Mat4 Translate(double x, double y, double z)
+        public Mat4 Translated(double x, double y, double z)
         {
             return this * new Mat4(1, 0, 0, x,
                                    0, 1, 0, y,
                                    0, 0, 1, z,
                                    0, 0, 0, 1);
         }
-        public static Mat4 Scaling(double x, double y, double z)
-        {
-            return new Mat4(x, 0, 0, 0,
-                            0, y, 0, 0,
-                            0, 0, z, 0,
-                            0, 0, 0, 1);
-        }
-        public Mat4 Scale(double x, double y, double z)
+        public Mat4 Scaled(double x, double y, double z)
         {
             return this * new Mat4(x, 0, 0, 0,
                                    0, y, 0, 0,
                                    0, 0, z, 0,
                                    0, 0, 0, 1);
         }
-
-        public static Mat4 Shearing(double Xy = 0, double Xz = 0, double Yx = 0, double Yz = 0, double Zx = 0, double Zy = 0)
-        {
-            return new Mat4(1, Xy, Xz, 0,
-                            Yx, 1, Yz, 0,
-                            Zx, Zy, 1, 0,
-                            0,  0,  0, 1);
-        }
-        public Mat4 Shear(double Xy = 0, double Xz = 0, double Yx = 0, double Yz = 0, double Zx = 0, double Zy = 0)
+        public Mat4 Sheared(double Xy = 0, double Xz = 0, double Yx = 0, double Yz = 0, double Zx = 0, double Zy = 0)
         {
             return this * new Mat4(1, Xy, Xz, 0,
                                    Yx, 1, Yz, 0,
                                    Zx, Zy, 1, 0,
                                    0,  0,  0, 1);
         }
-
-        public static Mat4 RotationX(double r)
-        {
-            double c = Math.Cos(r), s = Math.Sin(r);
-
-            return new Mat4(1, 0,  0, 0,
-                            0, c, -s, 0,
-                            0, s,  c, 0,
-                            0, 0,  0, 1);
-        }
-        public Mat4 RotateX(double r)
+        public Mat4 RotatedX(double r)
         {
             double c = Math.Cos(r), s = Math.Sin(r);
 
@@ -409,16 +382,7 @@ namespace RayTracingCS
                                    0, s,  c, 0,
                                    0, 0,  0, 1);
         }
-        public static Mat4 RotationY(double r)
-        {
-            double c = Math.Cos(r), s = Math.Sin(r);
-
-            return new Mat4( c, 0, s, 0,
-                             0, 1, 0, 0,
-                            -s, 0, c, 0,
-                             0, 0, 0, 1);
-        }
-        public Mat4 RotateY(double r)
+        public Mat4 RotatedY(double r)
         {
             double c = Math.Cos(r), s = Math.Sin(r);
 
@@ -427,18 +391,7 @@ namespace RayTracingCS
                                    -s, 0, c, 0,
                                     0, 0, 0, 1);
         }
-        public static Mat4 RotationZ(double r)
-        {
-            double c = Math.Cos(r), s = Math.Sin(r);
-
-            return new Mat4(c, -s, 0, 0,
-                            s,  c, 0, 0,
-                            0,  0, 0, 0,
-                            0,  0, 0, 1);
-        }
-
-        
-        public Mat4 RotateZ(double r)
+        public Mat4 RotatedZ(double r)
         {
             double c = Math.Cos(r), s = Math.Sin(r);
 
@@ -447,9 +400,5 @@ namespace RayTracingCS
                                    0,  0, 0, 0,
                                    0,  0, 0, 1);
         }
-
-        
     }
-
-
 }
