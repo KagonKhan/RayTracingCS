@@ -58,3 +58,41 @@ namespace RayTracingCS
         }
     }
 }
+
+
+
+
+
+/*                      Benchmarking v1
+ *                      
+ * Canvas size     10000    1000    500     250     100     50
+ * Time[ms]        35min    12042   4100    900     160     50
+ * 
+ * 
+ * 
+ *                      Benchmarking v2
+ * Canvas size     10000    1000    500     250     100     50
+ * Time[ms]         7min    5299   1700     430      86     40                        
+ *                      Benchmarking v3
+ * Canvas size
+ * Time
+ *                      Benchmarking v4
+ * Canvas size
+ * Time
+ *                      Benchmarking v5
+ * Canvas size
+ * Time
+ *                      Benchmarking v6
+ * Canvas size
+ * Time
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * */
