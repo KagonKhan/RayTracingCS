@@ -9,26 +9,52 @@ namespace RayTracingCS
         static void Main(string[] args)
         {
 
+            var canvas_pixels = 1000;
+            Canvas canvas = new(canvas_pixels, canvas_pixels);
+            canvas.Flush(Color.Black);
 
-            Canvas canvas = new(500, 500);
-            canvas.Flush(Color.Blue);
 
-            var middle  = new Point(250, 250, 0);
-            var top     = new Point(0, 0, 1);
+            Point ray_origin    = new Point(0, 0, -5);
+            double wall_z       = 10.0d;
+            double wall_size    = 7.0d;
+            double pixel_size   = wall_size / canvas_pixels;
+            double half         = wall_size / 2;
 
-            for (int i = 0; i < 12; i++) { 
-                var point = Mat4.RotationY(i * Math.PI / 6d).Scale(3,3,3) * top;
-                point.x *= 20;
-                point.z *= 20;
-                point.x += 250;
-                point.z += 250;
-                canvas.WritePixel((int)(point.x), (int)(point.z), Color.White);
+            var s = new Sphere(new Point(0,0,0), 1d);
+            //s.Transformation = Mat4.Scaling(250, 250, 1);
+
+
+            var empty_xs = new Intersection<Sphere>();
+            var r = new Ray(ray_origin, (new Point(0,0,0) - ray_origin).Normalize());
+
+            for (int x = 0; x < canvas_pixels; x++) 
+            {
+                for (int y = 0; y < canvas_pixels; y++)
+                {
+                    var world_y = half - pixel_size * y;
+                    var world_x = -half + pixel_size * x;
+                    var pos = new Point(world_x, world_y, wall_z);
+
+                    r.direction = (pos - ray_origin).Normalize();
+
+
+                    var xs = s.intersects(r);
+                    if (!Intersection<Sphere>.Hit(xs).Equals(empty_xs))
+                        canvas.WritePixel(x, y, Color.Red);
+
+
+                    if ((x * canvas_pixels + y) % 5000 == 0)
+                        Console.WriteLine($"{(x * canvas_pixels + y)} out of {canvas_pixels * canvas_pixels}");
+
+                }
             }
 
-
-
-
+            
             canvas.ToPPM();
+
+
+            
+
         }
     }
 }

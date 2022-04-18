@@ -434,6 +434,7 @@ namespace RayTracingCS.UnitTests
 
 
 
+
             r.origin    = new Point(0, 1, -5);
             r.direction = new Vector(0, 0, 1);
 
@@ -478,6 +479,69 @@ namespace RayTracingCS.UnitTests
             Assert.Equal(-4.0, intersection[1].t);
 
         }
+
+
+        [Fact]
+        public void HitTest()
+        {
+            var i1 = new Intersection<Sphere>(new Sphere(), 1);
+            var i2 = new Intersection<Sphere>(new Sphere(), 2);
+            Assert.Equal(i1, Intersection<Sphere>.Hit(i1, i2));
+
+
+
+            i1 = new Intersection<Sphere>(new Sphere(), -1);
+            i2 = new Intersection<Sphere>(new Sphere(), 1);
+            Assert.Equal(i2, Intersection<Sphere>.Hit(i1, i2));
+
+
+            i1 = new Intersection<Sphere>(new Sphere(), -1);
+            i2 = new Intersection<Sphere>(new Sphere(), -2);
+            Assert.Equal(new Intersection<Sphere>(), Intersection<Sphere>.Hit(i1, i2));
+
+
+            i1 = new Intersection<Sphere>(new Sphere(), 5);
+            i2 = new Intersection<Sphere>(new Sphere(), 7);
+            var i3 = new Intersection<Sphere>(new Sphere(), -3);
+            var i4 = new Intersection<Sphere>(new Sphere(), 2);
+            Assert.Equal(i4, Intersection<Sphere>.Hit(i1, i2, i3, i4));
+
+
+
+        }
+
+        [Fact]
+        public void RayTransformsTest()
+        {
+            var r = new Ray(new Point(1, 2, 3), new Vector(0, 1, 0));
+            var r2 = r.Transform(Mat4.Translation(3, 4, 5));
+
+            Assert.Equal(new Point(4, 6, 8), r2.origin);
+            Assert.Equal(new Vector(0, 1, 0), r2.direction);
+
+
+
+            r2 = r.Transform(Mat4.Scaling(2, 3, 4));
+
+            Assert.Equal(new Point(2, 6, 12), r2.origin);
+            Assert.Equal(new Vector(0, 3, 0), r2.direction);
+
+
+
+            r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var s = new Sphere();
+            s.Transformation = Mat4.Scaling(2, 2, 2);
+
+            var xs = s.intersects(r);
+
+            Assert.Equal(2, xs.Length);
+            Assert.Equal(3, xs[0].t);
+            Assert.Equal(7, xs[1].t);
+
+
+        }
+
     }
 }
+
 

@@ -23,11 +23,14 @@ namespace RayTracingCS
         {
             return direction * t + origin;
         }
+
+        public Ray Transform(Mat4 transformation)
+        {
+            return new Ray(transformation * origin, transformation * direction);
+        }
+
+
     }
-
-    
-
-
 
     public struct Intersection<T>
     {
@@ -38,6 +41,19 @@ namespace RayTracingCS
             this.obj = obj;
             this.t = t;
         }
+
+
+        public static Intersection<T> Hit(params Intersection<T>[] xs)
+        {
+
+            Array.Sort(xs, delegate(Intersection<T> a, Intersection<T> b) { return a.t > b.t ? 1 : a.t == b.t ? 0 : -1; });
+
+            for (int i = 0; i < xs.Length; i++)
+                if (xs[i].t > 0d)
+                    return xs[i];
+
+            return new Intersection<T>();
+        }
     }
 
 
@@ -45,20 +61,32 @@ namespace RayTracingCS
     {
         public Point position;
         double radius;
+
+        public Mat4 Transformation;
+            
         public Sphere (Point pos, double r)
         {
             radius = r;
             position = pos;
+            Transformation = Mat4.I;
         }
 
 
+        public void SetTransform(Mat4 transformation)
+        {
+             Transformation = transformation;
+        }
+
         public Intersection<Sphere>[] intersects (Ray ray)
         {
-            var sphereToRay = ray.origin - position;
+
+            ray = ray.Transform(Transformation.Inverse());
+
+            var sphereToRay = ray.origin - new Point(0,0,0);
 
             var a = ray.direction.Dot(ray.direction);
             var b = 2 * ray.direction.Dot(sphereToRay);
-            var c = sphereToRay.Dot(sphereToRay) - radius;
+            var c = sphereToRay.Dot(sphereToRay) - 1;
 
             var disc = Math.Pow(b, 2) - 4 * a * c;
 
