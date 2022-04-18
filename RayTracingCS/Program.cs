@@ -153,6 +153,14 @@ namespace RayTracingCS
                                 0, 0, 0, 1);
             }
 
+            public static Mat4 GetI()
+            {
+                return new Mat4(1, 0, 0, 0,
+                                0, 1, 0, 0,
+                                0, 0, 1, 0,
+                                0, 0, 0, 1);
+            }
+
             public static Mat4 Translation(double x, double y, double z)
             {
                 return new Mat4(1, 0, 0, x,
@@ -684,20 +692,31 @@ namespace RayTracingCS
             {
                 return (r + c) % 2 == 0 ? Minor(a, r, c) : -Minor(a, r, c);
             }
-            public static Mat4 Inverse(in Mat4 a)
+            public static Mat4 Inverse(Mat4 a)
             {
-                double det = Det(a);
+                Mat4 retVal = Mat.GetI();
+                
 
-                if (det == 0)
-                    throw new ArithmeticException("Matrix non inversible");
+                for (int i = 0; i < 4; i++)
+                    for (int j = 0; j < 4; j++)
+                        if (j != i)
+                        {
+                            double ratio = a[j, i] / a[i, i];
+                            for (int k = 0; k < 4; k++)
+                            {
+                                a[j, k] -= a[i, k] * ratio;
+                                retVal[j, k] -= retVal[i, k] * ratio;
+                            }
+                        }
 
-                Mat4 retVal = new Mat4(true);
+                for (int i = 0; i < 4; i++)
+                {
+                    double temp = 1 / a[i, i];
 
-                for (int row = 0; row < 4; row++)
-                    for (int col = 0; col < 4; col++)
-                    {
-                        retVal[col, row] = Cofactor(a, row, col) / det;
-                    }
+                    for (int j = 0; j < 4; j++)
+                        retVal[i, j] = retVal[i, j] * temp;
+
+                }
 
                 return retVal;
 
