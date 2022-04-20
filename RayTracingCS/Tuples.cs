@@ -45,10 +45,11 @@ namespace RayTracingCS
         }
         public override bool Equals(Object obj)
         {
-            if (obj is Color c)
-                return this.r == c.r && this.g == c.g && this.b == c.b;
+            if (!(obj is Color))
+                return false;
 
-            return false;
+            Color v = (Color)obj;
+            return this == v;
         }
 
 
@@ -69,7 +70,24 @@ namespace RayTracingCS
         public static Color operator *(in Color a, in Color b) {
             return new(a.r * b.r, a.g * b.g, a.b * b.b);
         }
-
+        public static bool operator ==(in Color a, in Color b)
+        {
+            for (int i = 0; i < 4; i++)
+                if (Math.Abs(a.r - b.r) < Mat.eps &&
+                    Math.Abs(a.g - b.g) < Mat.eps &&
+                    Math.Abs(a.b - b.b) < Mat.eps)
+                    return true;
+            return false;
+        }
+        public static bool operator !=(in Color a, in Color b)
+        {
+            for (int i = 0; i < 4; i++)
+                if (Math.Abs(a.r - b.r) < Mat.eps &&
+                    Math.Abs(a.g - b.g) < Mat.eps &&
+                    Math.Abs(a.b - b.b) < Mat.eps)
+                    return false;
+            return true;
+        }
         #endregion
     }
 

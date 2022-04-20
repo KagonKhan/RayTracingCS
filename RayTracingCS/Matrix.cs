@@ -175,11 +175,22 @@ namespace RayTracingCS
             mat[12] = m;  mat[13] = n;  mat[14] = o;  mat[15] = p;
         }
         public Mat4(int zero) : base(4){}
-        public Mat4(Mat4 copy) : base(4)
+        public Mat4(in Mat4 copy) : base(4)
         {
             for (int row = 0; row < 4; row++)
                 for (int col= 0; col< 4; col++) 
                     this[row, col] = copy[row, col];
+        }
+
+        public Mat4(in Vector r1, in Vector r2, in Vector r3, in Vector r4) : base(4)
+        {
+            for(int col = 0; col < 4; col++)
+            {
+                this[0, col] = r1[col];
+                this[1, col] = r2[col];
+                this[2, col] = r3[col];
+                this[3, col] = r4[col];
+            }
         }
 
         public static Mat4 operator *(in Mat4 a, in Mat4 b)
@@ -281,7 +292,7 @@ namespace RayTracingCS
         }
 
         // Copies original matrix
-        public Mat4 GetInverse(bool checkIfProper = false)
+        public Mat4 Inversed()
         {
             Mat4 retVal = new Mat4(I);
             Mat4 a      = new Mat4(this);

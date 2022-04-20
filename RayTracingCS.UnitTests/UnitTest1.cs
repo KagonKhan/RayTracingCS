@@ -1,6 +1,9 @@
 using Xunit;
 using RayTracingCS;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+
 
 namespace RayTracingCS.UnitTests
 {
@@ -113,37 +116,36 @@ namespace RayTracingCS.UnitTests
             Assert.Equal("1 -2 1 0", v2.Cross(v1).ToString());
         }
 
+    }
 
-
-
+    public class ColorTests
+    {
         [Fact]
         public void ColorCreationTest()
-        {
-            var c = new Color(0.2, 0.3, 0.4);
-            Assert.Equal("0,4 0,6 0,8", (2 * c).ToString());
-        }
+            {
+                var c = new Color(0.2, 0.3, 0.4);
+                Assert.Equal("0,4 0,6 0,8", (2 * c).ToString());
+            }
         [Fact]
         public void ColorMultiplicationTest()
-        {
-            var c = new Color(-0.5, 0.4, 1.7);
-            Assert.Equal("-0,5 0,4 1,7", c.ToString());
-        }
+            {
+                var c = new Color(-0.5, 0.4, 1.7);
+                Assert.Equal("-0,5 0,4 1,7", c.ToString());
+            }
         [Fact]
         public void ColorAdditionTest()
-        {
-            var c1 = new Color(0.9, 0.6, 0.75);
-            var c2 = new Color(0.7, 0.1, 0.25);
-            Assert.Equal("1,6 0,7 1", (c1 + c2).ToString());
-        }
+            {
+                var c1 = new Color(0.9, 0.6, 0.75);
+                var c2 = new Color(0.7, 0.1, 0.25);
+                Assert.Equal("1,6 0,7 1", (c1 + c2).ToString());
+            }
         [Fact]
         public void ColorSubtractionTest()
-        {
-            var c1 = new Color(0.9, 0.6, 0.75);
-            var c2 = new Color(0.7, 0.1, 0.25);
-            Assert.Equal($"{0.9d - 0.7d} 0,5 0,5", (c1 - c2).ToString());
-        }
-
-
+            {
+                var c1 = new Color(0.9, 0.6, 0.75);
+                var c2 = new Color(0.7, 0.1, 0.25);
+                Assert.Equal($"{0.9d - 0.7d} 0,5 0,5", (c1 - c2).ToString());
+            }
 
     }
 
@@ -207,7 +209,6 @@ namespace RayTracingCS.UnitTests
                                16, 26, 46, 42);
             Assert.Equal((res) , (m1 * m2));
         }
-
 
         [Fact]
         public void MatrixTupleComparison()
@@ -320,7 +321,7 @@ namespace RayTracingCS.UnitTests
                               7, 7, -6, -7,
                               1, -3, 7, 4);
 
-            var b = m.GetInverse();
+            var b = m.Inversed();
 
             var res = new Mat4(0.21805, 0.45113, 0.24060, -0.04511,
                                -0.80827, -1.45677, -0.44361, 0.52068,
@@ -349,7 +350,7 @@ namespace RayTracingCS.UnitTests
 
             Assert.Equal(new Point(2, 1, 7),  MatMaths.Translation(5, -3, 2) * p);
             Assert.Equal(v, MatMaths.Translation(5, -3, 2) * v);
-            Assert.Equal(new Point(-8, 7, 3), MatMaths.Translation(5, -3, 2).GetInverse() * p);
+            Assert.Equal(new Point(-8, 7, 3), MatMaths.Translation(5, -3, 2).Inversed() * p);
         }
         [Fact]
         public void ScalingTest()
@@ -361,7 +362,7 @@ namespace RayTracingCS.UnitTests
 
             Assert.True(MatMaths.Scaling(2, 3, 4) * p == new Point(-8, 18, 32));
             Assert.True(MatMaths.Scaling(2, 3, 4) * v == new Vector(-8, 18, 32));
-            Assert.True(MatMaths.Scaling(2, 3, 4).GetInverse() * v == new Vector(-2, 2, 2));
+            Assert.True(MatMaths.Scaling(2, 3, 4).Inversed() * v == new Vector(-2, 2, 2));
             Assert.True(MatMaths.Scaling(-1, 1, 1) * ps == new Point(-2, 3, 4));
 
         }
@@ -375,7 +376,7 @@ namespace RayTracingCS.UnitTests
             double r22 = Math.Sqrt(2) / 2d;
 
             Assert.True(MatMaths.RotationX(Math.PI / 4) * px == new Point(0, r22, r22));
-            Assert.True(MatMaths.RotationX(Math.PI / 4).GetInverse() * px == new Point(0, r22, -r22));
+            Assert.True(MatMaths.RotationX(Math.PI / 4).Inversed() * px == new Point(0, r22, -r22));
             Assert.True(MatMaths.RotationX(Math.PI / 2) * px == new Point(0, 0, 1));
 
             Assert.True(MatMaths.RotationY(Math.PI / 4) * py == new Point(r22, 0, r22));
@@ -387,7 +388,6 @@ namespace RayTracingCS.UnitTests
 
         }
     }
-
 
     public class RayTests
     {
@@ -425,7 +425,7 @@ namespace RayTracingCS.UnitTests
 
             var intersection = s.intersects(r);
 
-            Assert.Equal(2, intersection.Length);
+            Assert.Equal(2, intersection.Count);
             Assert.Equal(4.0, intersection[0].t);
             Assert.Equal(6.0, intersection[1].t);
             Assert.IsType<Sphere>(intersection[0].obj);
@@ -438,7 +438,7 @@ namespace RayTracingCS.UnitTests
 
             intersection = s.intersects(r);
 
-            Assert.Equal(2, intersection.Length);
+            Assert.Equal(2, intersection.Count);
             Assert.Equal(5.0, intersection[0].t);
             Assert.Equal(5.0, intersection[1].t);
 
@@ -450,7 +450,7 @@ namespace RayTracingCS.UnitTests
 
             intersection = s.intersects(r);
 
-            Assert.Equal(0, intersection.Length);
+            Assert.Empty(intersection);
 
 
 
@@ -460,7 +460,7 @@ namespace RayTracingCS.UnitTests
 
             intersection = s.intersects(r);
 
-            Assert.Equal(2, intersection.Length);
+            Assert.Equal(2, intersection.Count);
             Assert.Equal(-1.0, intersection[0].t);
             Assert.Equal(1.0, intersection[1].t);
 
@@ -472,7 +472,7 @@ namespace RayTracingCS.UnitTests
 
             intersection = s.intersects(r);
 
-            Assert.Equal(2, intersection.Length);
+            Assert.Equal(2, intersection.Count);
             Assert.Equal(-6.0, intersection[0].t);
             Assert.Equal(-4.0, intersection[1].t);
 
@@ -484,25 +484,29 @@ namespace RayTracingCS.UnitTests
         {
             var i1 = new Intersection(new Sphere(), 1);
             var i2 = new Intersection(new Sphere(), 2);
-            Assert.Equal(i1, Intersection.Hit(i1, i2));
+            var list = new List<Intersection> { i1, i2 };
+            Assert.Equal(i1, Intersection.Hit(list));
 
 
 
             i1 = new Intersection(new Sphere(), -1);
             i2 = new Intersection(new Sphere(), 1);
-            Assert.Equal(i2, Intersection.Hit(i1, i2));
+            list = new List<Intersection> { i1, i2 };
+            Assert.Equal(i2, Intersection.Hit(list));
 
 
             i1 = new Intersection(new Sphere(), -1);
             i2 = new Intersection(new Sphere(), -2);
-            Assert.Equal(new Intersection(), Intersection.Hit(i1, i2));
+            list = new List<Intersection> { i1, i2 };
+            Assert.Null(Intersection.Hit(list));
 
 
             i1 = new Intersection(new Sphere(), 5);
             i2 = new Intersection(new Sphere(), 7);
             var i3 = new Intersection(new Sphere(), -3);
             var i4 = new Intersection(new Sphere(), 2);
-            Assert.Equal(i4, Intersection.Hit(i1, i2, i3, i4));
+            list = new List<Intersection> { i1, i2, i3, i4 };
+            Assert.Equal(i4, Intersection.Hit(list));
 
 
 
@@ -532,7 +536,7 @@ namespace RayTracingCS.UnitTests
 
             var xs = s.intersects(r);
 
-            Assert.Equal(2, xs.Length);
+            Assert.Equal(2, xs.Count);
             Assert.Equal(3, xs[0].t);
             Assert.Equal(7, xs[1].t);
 
@@ -547,17 +551,17 @@ namespace RayTracingCS.UnitTests
             double s33 = Math.Sqrt(3d) / 3d;
             double s22 = Math.Sqrt(2d) / 2d;
 
-            Assert.Equal(new Vector(1, 0, 0), s.Normal(new Point(1, 0, 0)));
-            Assert.Equal(new Vector(0, 1, 0), s.Normal(new Point(0, 1, 0)));
-            Assert.Equal(new Vector(0, 0, 1), s.Normal(new Point(0, 0, 1)));
-            Assert.Equal(new Vector(s33, s33, s33), s.Normal(new Point(s33, s33, s33)));
-            Assert.Equal(s.Normal(new Point(s33, s33, s33)).Normalized(), s.Normal(new Point(s33, s33, s33)));
+            Assert.Equal(new Vector(1, 0, 0), s.NormalAt(new Point(1, 0, 0)));
+            Assert.Equal(new Vector(0, 1, 0), s.NormalAt(new Point(0, 1, 0)));
+            Assert.Equal(new Vector(0, 0, 1), s.NormalAt(new Point(0, 0, 1)));
+            Assert.Equal(new Vector(s33, s33, s33), s.NormalAt(new Point(s33, s33, s33)));
+            Assert.Equal(s.NormalAt(new Point(s33, s33, s33)).Normalized(), s.NormalAt(new Point(s33, s33, s33)));
 
             s.Transformation = MatMaths.Translation(0, 1, 0);
-            Assert.Equal(new Vector(0, s22, -s22), s.Normal(new Point(0, 1.70711, -0.70711)));
+            Assert.Equal(new Vector(0, s22, -s22), s.NormalAt(new Point(0, 1.70711, -0.70711)));
         
             s.Transformation = MatMaths.Scaling(1, 0.5, 1) * MatMaths.RotationZ(Math.PI/5);
-            Assert.Equal(new Vector(0, 0.97014, -0.24254), s.Normal(new Point(0, s22, -s22)));
+            Assert.Equal(new Vector(0, 0.97014, -0.24254), s.NormalAt(new Point(0, s22, -s22)));
         
         
         }
@@ -582,6 +586,279 @@ namespace RayTracingCS.UnitTests
 
         }
     }
+
+
+
+    public class LightTests
+    { 
+        [Fact]
+        public void LightCreationTests()
+        {
+            var light = new PointLight(new Point(0, 0, 0), new Color(1, 1, 1));
+
+            Assert.Equal(new Point(0, 0, 0), light.pos);
+            Assert.Equal(new Color(1, 1, 1), light.intensity);
+        }
+        
+        [Fact]
+        public void MaterialCreationTests()
+        {
+            var mat = new Material(0.1f, 0.9f, 0.9f, 200f, new Color(1,1,1));
+            Assert.Equal(0.1f, mat.ambient);
+            Assert.Equal(0.9f, mat.diffuse);
+            Assert.Equal(0.9f, mat.specular);
+            Assert.Equal(200f, mat.shininess);
+            Assert.Equal(new Color(1,1,1), mat.color);
+
+            var s = new Sphere();
+            s.material = mat;
+
+            Assert.Equal(mat, s.material);
+        }
+
+        [Fact]
+        public void LightingTests()
+        {
+            var l = new PointLight(new Point(0, 0, -10), new Color(1, 1, 1));
+            //var res = l.Lighting(Material)
+
+            // TODO: Finish tests
+        }
+    }
+
+
+    public class SceneTests
+    {
+        [Fact]
+        public void WorldCreationTests()
+        {
+            var light = new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1));
+            var s1 = new Sphere();
+            var s2 = new Sphere();
+
+            s1.material.color = new Color(0.8f, 1.0f, 0.6f);
+            s1.material.diffuse = 0.7f;
+            s1.material.specular = 0.2f;
+
+            s2.Transformation = MatMaths.Scaling(0.5, 0.5, 0.5);
+
+            var w = new World(s1, s2);
+            w.lights.AddFirst(light);
+
+            Assert.Contains(s1, w.objects);
+            Assert.Contains(s2, w.objects);
+            Assert.Equal(light, w.lights.First.Value);
+        }
+        [Fact]
+        public void WorldIntersectionTests()
+        {
+            var w = new World();
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var xs = w.Intersect(r);
+
+            Assert.Equal(4, xs.Count);
+
+            Assert.Equal(4,   xs[0].t);
+            Assert.Equal(4.5, xs[1].t);
+            Assert.Equal(5.5, xs[2].t);
+            Assert.Equal(6,   xs[3].t);
+        }
+
+        [Fact]
+        public void PrecomputationTests()
+        {
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var s = new Sphere();
+            var i = new Intersection(s, 4);
+            var comps = i.Compute(r);
+
+            Assert.Equal(i.t, comps.t);
+            Assert.Equal(i.obj, comps.obj);
+            Assert.Equal(new Point (0, 0, -1), comps.point);
+            Assert.Equal(new Vector(0, 0, -1), comps.eye);
+            Assert.Equal(new Vector(0, 0, -1), comps.normal);
+        }
+
+        [Fact]
+        public void HitTests()
+        {
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var s = new Sphere();
+            var i = new Intersection(s, 4);
+            var comps = i.Compute(r);
+
+            Assert.False(comps.inside);
+
+
+
+            r = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
+            i = new Intersection(s, 1);
+            comps = i.Compute(r);
+            Assert.Equal(new Point (0, 0,  1), comps.point);
+            Assert.Equal(new Vector(0, 0, -1), comps.eye);
+            Assert.Equal(new Vector(0, 0,  -1), comps.normal);
+            Assert.True(comps.inside);
+        }
+
+        [Fact]
+        public void ShadingTests()
+        {
+            var w = new World();
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var s = w.objects.First.Value;
+            var i = new Intersection(s, 4);
+            var comps = i.Compute(r);
+            var shade = w.Shading(comps);
+
+            Assert.Equal(new Color(0.38066, 0.47583, 0.2855), shade);
+
+
+
+            w.lights.First.Value = new PointLight(new Point(0f, 0.25f, 0f), new Color(1f, 1f, 1f));
+            r = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
+            s = w.objects.First.Next.Value;
+            i = new Intersection(s, 0.5);
+            comps = i.Compute(r);
+            shade = w.Shading(comps);
+
+            Assert.Equal(new Color(0.90498, 0.90498, 0.90498), shade);
+
+        }
+        [Fact]
+        public void ColoringTests()
+        {
+            var w = new World();
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 1, 0));
+            var c = w.Coloring(r);
+
+            Assert.Equal(new Color(), c);
+
+
+
+            r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            c = w.Coloring(r);
+
+            Assert.Equal(new Color(0.38066, 0.47583, 0.2855), c);
+
+
+
+            var outer = w.objects.First.Value;
+            outer.material.ambient = 1f;
+            var inner = w.objects.First.Next.Value;
+            inner.material.ambient = 1f;
+            r = new Ray(new Point(0, 0, 0.75), new Vector(0, 0, -1));
+            c = w.Coloring(r);
+
+            Assert.Equal(inner.material.color, c);
+        }
+
+        [Fact]
+        public void ViewTransformTests()
+        {
+            var from = new Point(0, 0, 0);
+            var to = new Point(0, 0, -1);
+            var up = new Vector(0, 1, 0);
+            var t = MatMaths.ViewTransform(from, to, up);
+
+            Assert.Equal(MatMaths.I, t);
+
+
+
+            from = new Point(0, 0, 0);
+            to = new Point(0, 0, 1);
+            up = new Vector(0, 1, 0);
+            t = MatMaths.ViewTransform(from, to, up);
+
+            Assert.Equal(MatMaths.Scaling(-1, 1,-1), t);
+
+
+
+            from = new Point(0, 0, 8);
+            to = new Point(0, 0, 0);
+            up = new Vector(0, 1, 0);
+            t = MatMaths.ViewTransform(from, to, up);
+
+            Assert.Equal(MatMaths.Translation(0,0,-8), t);
+
+
+
+            from = new Point(1,3,2);
+            to = new Point(4,-2,8);
+            up = new Vector(1, 1, 0);
+            t = MatMaths.ViewTransform(from, to, up);
+            var res = new Mat4(-0.50709, 0.50709, 0.67612, -2.36643,
+                                0.76772, 0.60609, 0.12122, -2.82843,
+                               -0.35857, 0.59761, -0.71714, 0.00000,
+                                0.00000, 0.00000, 0.00000, 1.00000);
+
+            Assert.Equal(res, t);
+        }
+
+
+        [Fact]
+        public void CameraCreationTests()
+        {
+            var h = 160;
+            var v = 120;
+            var pi = Math.PI;
+            var fov = pi / 2d;
+            var c = new Camera(h, v, fov);
+
+            Assert.Equal(h, c.width);
+            Assert.Equal(v, c.height);
+            Assert.Equal(fov, c.fov);
+            Assert.Equal(MatMaths.I, c.transform);
+
+
+            c = new Camera(200, 125, pi / 2);
+            Assert.Equal(0.01, Math.Round(c.pxsize, 3));
+
+            c = new Camera(125, 200, pi / 2);
+            Assert.Equal(0.01, Math.Round(c.pxsize, 3));
+
+        }
+
+
+        [Fact]
+        public void CameraRayTests()
+        {
+            var pi = Math.PI;
+            var c = new Camera(201, 101, pi / 2);
+            var r = c.Ray(100, 50);
+
+            Assert.Equal(new Point(0, 0, 0), r.origin);
+            Assert.Equal(new Vector(0, 0, -1), r.direction);
+
+
+
+            r = c.Ray(0, 0);
+
+            Assert.Equal(new Point(0, 0, 0), r.origin);
+            Assert.Equal(new Vector(0.66519, 0.33259, -0.66851), r.direction);
+
+
+
+            c.transform = MatMaths.RotationY(pi / 4) * MatMaths.Translation(0, -2, 5);
+            r = c.Ray(100, 50);
+            var s22 = Math.Sqrt(2) / 2d;
+
+            Assert.Equal(new Point(0, 2, -5), r.origin);
+            Assert.Equal(new Vector(s22, 0, -s22), r.direction);
+
+        }
+
+        [Fact]
+        public void CameraRenderTests()
+        {
+            var w = new World();
+            var c = new Camera(11,11,Math.PI/2);
+            c.transform = MatMaths.ViewTransform(new Point(0, 0, -5), new Point(0, 0, 0), new Vector(0, 1, 0));
+            var image = c.Render(w);
+
+            Assert.Equal(new Color(0.38066, 0.47583, 0.2855), image[5, 5]);
+        }
+    }
+
 }
 
 

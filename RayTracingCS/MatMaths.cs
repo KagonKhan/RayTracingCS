@@ -9,6 +9,11 @@ namespace RayTracingCS
 
     public static class MatMaths
     {
+        public static int SpaceshipOp(double a, double b) => a > b ? 1 : a == b ? 0 : -1;
+
+
+
+
         public static readonly double eps = 0.01;
         public readonly static Mat4 I = new Mat4(1.0d, 0.0d, 0.0d, 0.0d,
                                                  0.0d, 1.0d, 0.0d, 0.0d,
@@ -299,7 +304,17 @@ namespace RayTracingCS
                             0, 0, 0, 1);
         }
 
+        public static Mat4 ViewTransform(in Point from, in Point to, in Vector up)
+        {
+            Vector forward = (to - from).Normalized();
+            Vector left = forward.Cross(up.Normalized());
+            Vector trueUp = left.Cross(forward);
+            Vector nul = new Vector(0, 0, 0, 1);
 
+            Mat4 orientation = new Mat4(left, trueUp, -forward, nul);
+
+            return orientation * Translation(-from.X, -from.Y, -from.Z);
+        }
 
         #endregion
 
@@ -360,7 +375,7 @@ namespace RayTracingCS
         {
             return Mult(a, scalar);
         }
-        #endregion
+
 
         public static double Mag(in Vector a)
         {
@@ -391,6 +406,7 @@ namespace RayTracingCS
                               a[2] * b[0] - a[0] * b[2],
                               a[1] * b[1] - a[1] * b[0]);
         }
+        #endregion
     }
 }
 
