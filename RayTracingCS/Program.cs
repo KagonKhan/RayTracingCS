@@ -9,11 +9,6 @@ namespace RayTracingCS
     class Program
     {
 
-
-       
-
-
-
         static void Main(string[] args)
         {
             #region spheres
@@ -65,11 +60,11 @@ namespace RayTracingCS
 
 
             World w = new World(floor, left_wall, right_wall, middle, right, left);
-            w.lights.AddFirst(new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1)));
-            w.lights.AddFirst(new PointLight(new Point( 10, 10, -10), new Color(1, 1, 1)));
+            w.lights.Add(new PointLight(new Point(-10, 10, -10), new Color(0.76, 0.66, 0.66)));
+            w.lights.Add(new PointLight(new Point( 10, 10, -10), new Color(0.76, 0.66, 0.66)));
 
 
-            Camera c = new Camera(7680, 4320, Math.PI / 3);
+            Camera c = new Camera(7680/8, 4320/8, Math.PI / 3);
             c.transform = MatMaths.ViewTransform(new Point(0, 1.5, -5), new Point(0, 1, 0), new Vector(0, 1, 0));
 
             var watch = System.Diagnostics.Stopwatch.StartNew();

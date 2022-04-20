@@ -35,16 +35,17 @@ namespace RayTracingCS
         public void WritePixel(int row, int col, in Color c)
         {
 #if DEBUG
-            Console.WriteLine($"Writing to ({x},{y})");
+            Console.WriteLine($"Writing to ({row},{col})");
 #endif
 
             if (col >= width || col < 0 || row >= height || row < 0) 
                 return;
 
-            Color scaled = c * 255;
-            PointLight.Clamp(ref (scaled));
-            canvas[row, col] = scaled;
+
+            canvas[row, col] = ClampR(c * 255);
         }
+
+        // Artifacts: no space after color values in file
 
         public void ToPPM()
         {
@@ -62,6 +63,17 @@ namespace RayTracingCS
 
 
             System.IO.File.WriteAllText("canvas.ppm", sb.ToString());
+        }
+        private void Clamp(ref Color c)
+        {
+            c.r = Math.Clamp(c.r, 0, 255);
+            c.g = Math.Clamp(c.g, 0, 255);
+            c.b = Math.Clamp(c.b, 0, 255);
+        }
+        private Color ClampR(in Color c)
+        {
+            return new Color(Math.Clamp(c.r, 0, 255), Math.Clamp(c.g, 0, 255), Math.Clamp(c.b, 0, 255));
+            
         }
     }
 }

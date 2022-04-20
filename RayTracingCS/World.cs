@@ -61,6 +61,7 @@ namespace RayTracingCS
         public double t;
         public HitObject obj;
         public Point point;
+        public Point over_point;
         public Vector eye;
         public Vector normal;
         public bool inside;
@@ -73,6 +74,9 @@ namespace RayTracingCS
             this.eye = eye;
             this.normal = norm;
             this.inside = inside;
+            this.over_point = p;
+
+            over_point = p + normal * (MatMaths.eps);
         }
     }
 
@@ -137,7 +141,7 @@ namespace RayTracingCS
     {
         // Possibly a dictionary with IDs
         public LinkedList<HitObject> objects = new LinkedList<HitObject>();
-        public LinkedList<Light> lights = new LinkedList<Light>();
+        public List<Light> lights = new List<Light>();
 
         public World(params HitObject[] objs)
         {
@@ -156,7 +160,7 @@ namespace RayTracingCS
 
             s2.Transformation = MatMaths.Scaling(0.5, 0.5, 0.5);
 
-            lights.AddLast(light);
+            lights.Add(light);
             objects.AddLast(s1);
             objects.AddLast(s2);
         }
@@ -186,9 +190,14 @@ namespace RayTracingCS
         public Color Shading(in Computations comp)
         {
             Color retVal = Color.Black;
+
+            int lightIndex = 0;
             foreach (var light in lights)
             {
-                retVal += light.Lighting(comp.obj.material, comp.point, comp.eye, comp.normal);
+                bool shaded = IsShadowed(comp.over_point, lightIndex);
+                retVal += light.Lighting(comp.obj.material, comp.point, comp.eye, comp.normal, shaded);
+
+                lightIndex++;
             }
 
             return retVal;
@@ -208,6 +217,25 @@ namespace RayTracingCS
                 Computations comp = hit.Compute(r);
                 return Shading(comp);
             }
+        }
+
+        
+        public bool IsShadowed(in Point p, int lightIndex)
+        {
+            Vector v = lights[lightIndex].pos - p;
+
+            double distance = v.Magnitude();
+            Vector direction = v.Normalized();
+
+            Ray r = new Ray(p, direction);
+
+            var xs = Intersect(r);
+            var h = Intersection.Hit(xs);
+
+            if (h != null && h.t < distance)
+                return true;
+            else
+                return false;
         }
     }
 
@@ -286,5 +314,7 @@ namespace RayTracingCS
 
             return retVal;
         }
+
+
     }
 }

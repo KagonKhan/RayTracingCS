@@ -21,6 +21,7 @@ namespace RayTracingCS
 
         abstract public List<Intersection> intersects(in Ray ray);
         public abstract Vector LocalNormalAt(in Point p);
+
         public Vector NormalAt(in Point p)
         {
             Mat4 inv = Transformation.Inversed();

@@ -421,7 +421,7 @@ namespace RayTracingCS.UnitTests
             var direction   = new Vector(0, 0, 1);
 
             var r = new Ray(origin, direction);
-            var s = new Sphere(new Point(0,0,0), 1d);
+            var s = new Sphere();
 
             var intersection = s.intersects(r);
 
@@ -623,6 +623,11 @@ namespace RayTracingCS.UnitTests
             //var res = l.Lighting(Material)
 
             // TODO: Finish tests
+        }
+        [Fact]
+        public void ShadowTests()
+        {
+
         }
     }
 
