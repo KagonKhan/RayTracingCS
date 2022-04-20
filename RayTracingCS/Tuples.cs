@@ -160,17 +160,13 @@ namespace RayTracingCS
                     return true;
             return false;
         }
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj is Point p)
-            {
-                return val[0] == p[0]
-                    && val[1] == p[1]
-                    && val[2] == p[2]
-                    && val[3] == p[3];
-            }
+            if (!(obj is Point))
+                return false;
 
-            return false;
+            Point v = (Point)obj;
+            return this == v;
         }
         #endregion
 
@@ -273,17 +269,13 @@ namespace RayTracingCS
             return false;
         }
 
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
-            if (obj is Vector v)
-            {
-                return this[0] == v[0]
-                    && this[1] == v[1]
-                    && this[2] == v[2]
-                    && this[3] == v[3];
-            }
+            if (!(obj is Vector))
+                return false;
 
-            return false;
+            Vector v = (Vector)obj;
+            return this == v;
         }
         #endregion
 
@@ -315,6 +307,12 @@ namespace RayTracingCS
             return new Vector(val[1] * b[2] - val[2] * b[1],
                               val[2] * b[0] - val[0] * b[2],
                               val[0] * b[1] - val[1] * b[0]);
+        }
+
+
+        public static Vector Reflect(in Vector v, in Vector norm)
+        {
+            return v - norm * 2 * MatMaths.Dot(v, norm);
         }
 
     }

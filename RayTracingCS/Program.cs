@@ -18,7 +18,7 @@ namespace RayTracingCS
         {
 
 
-            var canvas_pixels = 1000;
+            var canvas_pixels = 2500;
             Canvas canvas = new(canvas_pixels, canvas_pixels);
             canvas.Flush(Color.Black);
 
@@ -30,6 +30,20 @@ namespace RayTracingCS
             double half         = wall_size / 2;
 
             var s = new Sphere(new Point(0,0,0), 1d);
+            s.material = new Material(0.1f, 0.9f, 0.9f, 200f, new Color(1, 0.2, 1));
+
+
+            var light_position = new Point(-10, 10, -10);
+            var light_color = new Color(255, 255, 255);
+            var light = new PointLight(light_position, light_color);
+
+
+
+
+
+
+
+
             //s.Transformation = Mat4.Scaling(250, 250, 1);
 
 
@@ -44,7 +58,7 @@ namespace RayTracingCS
             {
                 for (int y = 0; y < canvas_pixels; y++)
                 {
-                    var world_y = half - pixel_size * y;
+                    var world_y =  half - pixel_size * y;
                     var world_x = -half + pixel_size * x;
                     var pos = new Point(world_x, world_y, wall_z);
 
@@ -52,8 +66,17 @@ namespace RayTracingCS
 
 
                     var xs = s.intersects(r);
-                    if (!Intersection.Hit(xs).Equals(empty_xs))
-                        canvas.WritePixel(x, y, Color.Red);
+                    var hit = Intersection.Hit(xs);
+
+                    if (!hit.Equals(empty_xs))
+                    {
+                        var point = r.position(hit.t);
+                        var normal = Sphere.Normal((Sphere)hit.obj, point);
+                        var eye = -r.direction;
+
+                        Color color = PointLight.Lighting(((Sphere)(hit.obj)).material, light, point, eye, normal);
+                        canvas.WritePixel(x, y, color);
+                    }
 
 
                     if ((x * canvas_pixels + y) % 5000 == 0)

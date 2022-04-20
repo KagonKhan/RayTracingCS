@@ -102,7 +102,7 @@ namespace RayTracingCS.UnitTests
         {
             var v1 = new Vector(1, 2, 3);
             var v2 = new Vector(2, 3, 4);
-            Assert.Equal(20.0d, v1.Dot(v2));
+            Assert.Equal(20.0d, MatMaths.Dot(v1, v2));
         }
         [Fact]
         public void VectorCrossTest()
@@ -539,6 +539,48 @@ namespace RayTracingCS.UnitTests
 
         }
 
+
+        [Fact]
+        public void NormalTests()
+        {
+            var s = new Sphere();
+            double s33 = Math.Sqrt(3d) / 3d;
+            double s22 = Math.Sqrt(2d) / 2d;
+
+            Assert.Equal(new Vector(1, 0, 0), s.Normal(new Point(1, 0, 0)));
+            Assert.Equal(new Vector(0, 1, 0), s.Normal(new Point(0, 1, 0)));
+            Assert.Equal(new Vector(0, 0, 1), s.Normal(new Point(0, 0, 1)));
+            Assert.Equal(new Vector(s33, s33, s33), s.Normal(new Point(s33, s33, s33)));
+            Assert.Equal(s.Normal(new Point(s33, s33, s33)).Normalized(), s.Normal(new Point(s33, s33, s33)));
+
+            s.Transformation = MatMaths.Translation(0, 1, 0);
+            Assert.Equal(new Vector(0, s22, -s22), s.Normal(new Point(0, 1.70711, -0.70711)));
+        
+            s.Transformation = MatMaths.Scaling(1, 0.5, 1) * MatMaths.RotationZ(Math.PI/5);
+            Assert.Equal(new Vector(0, 0.97014, -0.24254), s.Normal(new Point(0, s22, -s22)));
+        
+        
+        }
+
+        [Fact]
+        public void ReflectTests()
+        {
+            double s33 = Math.Sqrt(3d) / 3d;
+            double s22 = Math.Sqrt(2d) / 2d;
+
+
+            var v = new Vector(1, -1, 0);
+            var n = new Vector(0, 1, 0);
+
+            var r = Vector.Reflect(v, n);
+            Assert.Equal(new Vector(1, 1, 0), r);
+
+            v = new Vector(0, -1, 0);
+            n = new Vector(s22, s22, 0);
+            r = Vector.Reflect(v, n);
+            Assert.Equal(new Vector(1, 0, 0), r);
+
+        }
     }
 }
 
