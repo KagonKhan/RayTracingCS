@@ -423,7 +423,7 @@ namespace RayTracingCS.UnitTests
             var r = new Ray(origin, direction);
             var s = new Sphere();
 
-            var intersection = s.intersects(r);
+            var intersection = s.IntersectionsWith(r);
 
             Assert.Equal(2, intersection.Count);
             Assert.Equal(4.0, intersection[0].t);
@@ -436,7 +436,7 @@ namespace RayTracingCS.UnitTests
             r.origin    = new Point(0, 1, -5);
             r.direction = new Vector(0, 0, 1);
 
-            intersection = s.intersects(r);
+            intersection = s.IntersectionsWith(r);
 
             Assert.Equal(2, intersection.Count);
             Assert.Equal(5.0, intersection[0].t);
@@ -448,7 +448,7 @@ namespace RayTracingCS.UnitTests
             r.origin    = new Point(0, 2, -5);
             r.direction = new Vector(0, 0, 1);
 
-            intersection = s.intersects(r);
+            intersection = s.IntersectionsWith(r);
 
             Assert.Empty(intersection);
 
@@ -458,7 +458,7 @@ namespace RayTracingCS.UnitTests
             r.origin    = new Point(0, 0, 0);
             r.direction = new Vector(0, 0, 1);
 
-            intersection = s.intersects(r);
+            intersection = s.IntersectionsWith(r);
 
             Assert.Equal(2, intersection.Count);
             Assert.Equal(-1.0, intersection[0].t);
@@ -470,7 +470,7 @@ namespace RayTracingCS.UnitTests
             r.origin    = new Point(0, 0, 5);
             r.direction = new Vector(0, 0, 1);
 
-            intersection = s.intersects(r);
+            intersection = s.IntersectionsWith(r);
 
             Assert.Equal(2, intersection.Count);
             Assert.Equal(-6.0, intersection[0].t);
@@ -534,7 +534,7 @@ namespace RayTracingCS.UnitTests
             var s = new Sphere();
             s.Transformation = MatMaths.Scaling(2, 2, 2);
 
-            var xs = s.intersects(r);
+            var xs = s.IntersectionsWith(r);
 
             Assert.Equal(2, xs.Count);
             Assert.Equal(3, xs[0].t);
@@ -648,11 +648,11 @@ namespace RayTracingCS.UnitTests
             s2.Transformation = MatMaths.Scaling(0.5, 0.5, 0.5);
 
             var w = new World(s1, s2);
-            w.lights.AddFirst(light);
+            w.lights.Add(light);
 
             Assert.Contains(s1, w.objects);
             Assert.Contains(s2, w.objects);
-            Assert.Equal(light, w.lights.First.Value);
+            Assert.Equal(light, w.lights[0]);
         }
         [Fact]
         public void WorldIntersectionTests()
@@ -719,7 +719,7 @@ namespace RayTracingCS.UnitTests
 
 
 
-            w.lights.First.Value = new PointLight(new Point(0f, 0.25f, 0f), new Color(1f, 1f, 1f));
+            w.lights.Add(new PointLight(new Point(0f, 0.25f, 0f), new Color(1f, 1f, 1f)));
             r = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
             s = w.objects.First.Next.Value;
             i = new Intersection(s, 0.5);

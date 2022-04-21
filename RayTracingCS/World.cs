@@ -7,32 +7,8 @@ using System.Threading.Tasks;
 namespace RayTracingCS
 {
 
-    public class Material
-    {
-        public float ambient;
-        public float diffuse;
-        public float specular;
-        public float shininess;
-        public Color color;
 
-        public Material(float amb, float dif, float spe, float shi, in Color col)
-        {
-            ambient = amb;
-            diffuse = dif;
-            specular = spe;
-            shininess = shi;
-            color = col;
-        }
 
-        public Material()
-        {
-            color = new Color(1, 1, 1);
-            ambient = 0.1f;
-            diffuse = 0.9f;
-            specular = 0.9f;
-            shininess = 200f;
-        }
-    }
 
     public struct Ray
     {
@@ -174,7 +150,7 @@ namespace RayTracingCS
 
             foreach (var item in objects)
             {
-                var xs = item.intersects(r);
+                var xs = item.IntersectionsWith(r);
 
                 if (xs != null)
                 {
@@ -195,7 +171,7 @@ namespace RayTracingCS
             foreach (var light in lights)
             {
                 bool shaded = IsShadowed(comp.over_point, lightIndex);
-                retVal += light.Lighting(comp.obj.material, comp.point, comp.eye, comp.normal, shaded);
+                retVal += light.Lighting(comp.obj.material, comp.obj, comp.point, comp.eye, comp.normal, shaded);
 
                 lightIndex++;
             }

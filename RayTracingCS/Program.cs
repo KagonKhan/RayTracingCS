@@ -2,36 +2,31 @@
 using System.Threading;
 
 
+
 namespace RayTracingCS
 {
 
    
     class Program
     {
+        const double pi = Math.PI;
+
 
         static void Main(string[] args)
         {
             #region spheres
-            Sphere floor = new Sphere();
-            floor.Transformation = MatMaths.I.Scaled(10, 0.01, 10);
+            Plane floor = new Plane();
             floor.material = new Material();
             floor.material.color = new Color(1, 0.9, 0.9);
             floor.material.specular = 0;
+            floor.material.pattern = new Checkered2DPattern(new Color(1, 0, 0), new Color(0, 0, 1));
 
-
-            Sphere left_wall = new Sphere();
-            left_wall.Transformation = MatMaths.I.Translated(0, 0, 5).
-                                                  RotatedY(-Math.PI / 4).
-                                                  RotatedX(Math.PI / 2).
-                                                  Scaled(10, 0.01, 10);
-            left_wall.material = floor.material;
-
-            Sphere right_wall = new Sphere();
-            right_wall.Transformation = MatMaths.I.Translated(0, 0, 5).
-                                                  RotatedY(Math.PI / 4).
-                                                  RotatedX(Math.PI / 2).
-                                                  Scaled(10, 0.01, 10);
-            right_wall.material = left_wall.material;
+            Plane back_wall = new Plane();
+            back_wall.Transformation = MatMaths.I.Translated(0, 0, 20).RotatedX(pi/2);
+            back_wall.material = new Material();
+            back_wall.material.color = new Color(0.7, 0.2, 1);
+            back_wall.material.specular = 0;
+            back_wall.material.pattern = new Checkered2DPattern(new Color(1, 0, 0), new Color(0, 0, 1));
 
 
 
@@ -42,6 +37,8 @@ namespace RayTracingCS
             middle.material.color = new Color(0.1, 1, 0.5);
             middle.material.diffuse = 0.7f;
             middle.material.specular = 0.3f;
+            middle.material.pattern = new Checkered2DPattern(new Color(1,0,0), new Color(0,0,1));
+
 
             Sphere right = new Sphere();
             right.Transformation = MatMaths.I.Translated(1.5, 0.5, -0.5).Scaled(0.5, 0.5, 0.5);
@@ -49,6 +46,8 @@ namespace RayTracingCS
             right.material.color = new Color(0.5, 1, 0.1);
             right.material.diffuse = 0.7f;
             right.material.specular = 0.3f;
+            right.material.pattern = new StripePattern(new Color(1, 0, 1), new Color(0, 1, 1));
+
 
             Sphere left = new Sphere();
             left.Transformation = MatMaths.I.Translated(-1.5, 0.33, -0.75).Scaled(0.33, 0.33, 0.33);
@@ -56,12 +55,13 @@ namespace RayTracingCS
             left.material.color = new Color(1, 0.8, 0.1);
             left.material.diffuse = 0.7f;
             left.material.specular = 0.3f;
+            left.material.pattern = new CheckeredPattern(new Color(1, 0, 1), new Color(0, 1, 1));
             #endregion
 
 
-            World w = new World(floor, left_wall, right_wall, middle, right, left);
-            w.lights.Add(new PointLight(new Point(-10, 10, -10), new Color(0.76, 0.66, 0.66)));
-            w.lights.Add(new PointLight(new Point( 10, 10, -10), new Color(0.76, 0.66, 0.66)));
+            World w = new World(floor, back_wall, middle, right, left);
+            w.lights.Add(new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1)));
+            //w.lights.Add(new PointLight(new Point( 10, 10, -10), new Color(0.66, 0.66, 0.66)));
 
 
             Camera c = new Camera(7680/8, 4320/8, Math.PI / 3);

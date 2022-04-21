@@ -7,3 +7,4 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility")]
 [assembly: SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible")]
+[assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]

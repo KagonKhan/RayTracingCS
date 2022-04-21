@@ -11,16 +11,18 @@ namespace RayTracingCS
     {
         public static int currID = 0;
         public int ID;
-        public Material material =   new Material();
-        public Mat4 Transformation = new Mat4(Mat4.I);
+        public Material material =   new();
+        public Mat4 Transformation = new(Mat4.I);
 
         protected HitObject()
         {
             ID = currID++;
         }
 
-        abstract public List<Intersection> intersects(in Ray ray);
-        public abstract Vector LocalNormalAt(in Point p);
+
+        protected abstract Vector LocalNormalAt(in Point p);
+        protected abstract List<Intersection> LocalIntersectionsWith(in Ray ray);
+
 
         public Vector NormalAt(in Point p)
         {
@@ -32,6 +34,12 @@ namespace RayTracingCS
 
             return world_normal.Normalized();
         }
+
+        public List<Intersection> IntersectionsWith(in Ray ray)
+        {
+            var r = ray.Transform(Transformation.Inversed());
+            return LocalIntersectionsWith(r);
+        }
     }
 
   
@@ -41,36 +49,54 @@ namespace RayTracingCS
         public Sphere() : base() {}
     
         
-        public override List<Intersection> intersects(in Ray ray)
+        protected override List<Intersection> LocalIntersectionsWith(in Ray ray)
         {
-            
-            var r = ray.Transform(Transformation.Inversed());
+
+            var sphereToRay = ray.origin - new Point(0, 0, 0);
     
-            var sphereToRay = r.origin - new Point(0, 0, 0);
-    
-            var a = r.direction.Dot(r.direction);
-            var b = 2 * r.direction.Dot(sphereToRay);
+            var a = ray.direction.Dot(ray.direction);
+            var b = 2 * ray.direction.Dot(sphereToRay);
             var c = sphereToRay.Dot(sphereToRay) - 1;
+
+            var delta = b * b - 4 * a * c;
     
-            var disc = Math.Pow(b, 2) - 4 * a * c;
-    
-            if (disc < 0)
+            if (delta < 0)
                 return new List<Intersection>();
             else
             {
-                var t1 = (-b - Math.Sqrt(disc)) / (2 * a);
-                var t2 = (-b + Math.Sqrt(disc)) / (2 * a);
+                var t1 = (-b - Math.Sqrt(delta)) / (2 * a);
+                var t2 = (-b + Math.Sqrt(delta)) / (2 * a);
         
                 return new List<Intersection> { new(this, t1), new(this, t2) };
             }
         }
 
 
-        public override Vector LocalNormalAt(in Point p)
+        protected override Vector LocalNormalAt(in Point p)
         {
             Vector norm = (p - new Point(0, 0, 0));
-            norm.W = 0;
+            // careful for w != 0
             return norm.Normalized();
+        }
+    }
+    
+    public class Plane : HitObject
+    {
+        public Plane() : base() {}
+
+        protected override List<Intersection> LocalIntersectionsWith(in Ray ray)
+        {
+            if (Math.Abs(ray.direction.Y) < MatMaths.eps)
+                return new List<Intersection>();
+
+            double t = -ray.origin.Y / ray.direction.Y;
+
+            return new List<Intersection>() { new Intersection(this, t) };
+
+        }
+        protected override Vector LocalNormalAt(in Point p)
+        {
+            return new Vector(0, 1, 0);
         }
     }
 }

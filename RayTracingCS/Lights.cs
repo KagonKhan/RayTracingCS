@@ -12,7 +12,7 @@ namespace RayTracingCS
         public Point pos;
         public Color intensity;
 
-        public abstract Color Lighting(in Material m, in Point p, in Vector eye, in Vector norm, bool shadowed = false);
+        public abstract Color Lighting(in Material m, in HitObject obj, in Point p, in Vector eye, in Vector norm, bool shadowed = false);
     }
 
 
@@ -24,9 +24,11 @@ namespace RayTracingCS
             pos = p;
             intensity = i;
         }
-        public override Color Lighting(in Material m, in Point p, in Vector eye, in Vector norm, bool shadowed = false)
+        public override Color Lighting(in Material m, in HitObject obj, in Point p, in Vector eye, in Vector norm, bool shadowed = false)
         {
-            var eff_color = m.color * intensity;
+            var eff_color = (m.pattern != null) ? m.pattern.GetOnObject(p, obj) : m.color;
+            eff_color *= intensity;
+
             var ambient = eff_color * m.ambient;
 
 
