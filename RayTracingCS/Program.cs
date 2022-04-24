@@ -1,32 +1,104 @@
 ﻿using System;
-using System.Threading;
-
-
+using System.Windows;
 
 namespace RayTracingCS
 {
 
    
-    class Program
+    public static class Program
     {
         const double pi = Math.PI;
 
+        static public Canvas canvas;
+        static public bool isDone = false;
 
-        static void Main(string[] args)
+
+        static World w;
+        static Camera c;
+
+
+        static public void InitRealTime(int width, int height)
         {
+            Plane floor = new Plane();
+            floor.material = new Material();
+            floor.material.color = new Color(1, 0.9, 0.9);
+            floor.material.specular = 0;
+
+            Plane back_wall = new Plane();
+            back_wall.Transformation = MatMaths.I.Translated(0, 0, 20).RotatedX(pi / 2);
+            back_wall.material = new Material();
+            back_wall.material.color = new Color(0.7, 0.2, 1);
+            back_wall.material.specular = 0;
+
+            Sphere middle = new Sphere();
+            middle.Transformation = MatMaths.I.Translated(-0.5, 1, 0.5);
+            middle.material = new Material();
+            middle.material.color = new Color(0.1, 1, 0.5);
+            middle.material.diffuse = 0.7f;
+            middle.material.specular = 0.3f;
+
+            Sphere right = new Sphere();
+            right.Transformation = MatMaths.I.Translated(1.5, 0.5, -0.5).Scaled(0.5, 0.5, 0.5);
+            right.material = new Material();
+            right.material.color = new Color(0.5, 1, 0.1);
+            right.material.diffuse = 0.7f;
+            right.material.specular = 0.3f;
+
+            Sphere left = new Sphere();
+            left.Transformation = MatMaths.I.Translated(-1.5, 0.33, -0.75).Scaled(0.33, 0.33, 0.33);
+            left.material = new Material();
+            left.material.color = new Color(1, 0.8, 0.1);
+            left.material.diffuse = 0.7f;
+            left.material.specular = 0.3f;
+
+
+
+            back_wall.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            left.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            right.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            middle.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            middle.material.pattern.Transformation = Mat4.I.RotatedY(-0.5).RotatedX(-0.3).Scaled(0.03125, 0.125, 0.6125);
+
+
+
+
+
+            w = new World(floor, back_wall, middle, right, left);
+            w.lights.Add(new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1)));
+            //w.lights.Add(new PointLight(new Point( 10, 10, -10), new Color(0.66, 0.66, 0.66)));
+
+
+            c = new Camera(width, height, Math.PI / 3);
+            c.transform = MatMaths.ViewTransform(new Point(0, 1.5, -5), new Point(0, 1, 0), new Vector(0, 1, 0));
+        }
+
+        static public Color RenderRealTime()
+        {
+
+            return Canvas.ClampR(c.RenderRealTime(w) * 255);
+
+        }
+        public static void Main()
+        {
+
+
+
+
+
             #region spheres
             Plane floor = new Plane();
             floor.material = new Material();
             floor.material.color = new Color(1, 0.9, 0.9);
             floor.material.specular = 0;
-            floor.material.pattern = new Checkered2DPattern(new Color(1, 0, 0), new Color(0, 0, 1));
+
 
             Plane back_wall = new Plane();
             back_wall.Transformation = MatMaths.I.Translated(0, 0, 20).RotatedX(pi/2);
             back_wall.material = new Material();
             back_wall.material.color = new Color(0.7, 0.2, 1);
             back_wall.material.specular = 0;
-            back_wall.material.pattern = new Checkered2DPattern(new Color(1, 0, 0), new Color(0, 0, 1));
+
+
 
 
 
@@ -37,7 +109,7 @@ namespace RayTracingCS
             middle.material.color = new Color(0.1, 1, 0.5);
             middle.material.diffuse = 0.7f;
             middle.material.specular = 0.3f;
-            middle.material.pattern = new Checkered2DPattern(new Color(1,0,0), new Color(0,0,1));
+
 
 
             Sphere right = new Sphere();
@@ -46,7 +118,6 @@ namespace RayTracingCS
             right.material.color = new Color(0.5, 1, 0.1);
             right.material.diffuse = 0.7f;
             right.material.specular = 0.3f;
-            right.material.pattern = new StripePattern(new Color(1, 0, 1), new Color(0, 1, 1));
 
 
             Sphere left = new Sphere();
@@ -55,8 +126,19 @@ namespace RayTracingCS
             left.material.color = new Color(1, 0.8, 0.1);
             left.material.diffuse = 0.7f;
             left.material.specular = 0.3f;
-            left.material.pattern = new CheckeredPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+
             #endregion
+
+
+
+            back_wall.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            left.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            right.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            middle.material.pattern = new RingPattern(new Color(1, 0, 1), new Color(0, 1, 1));
+            middle.material.pattern.Transformation = Mat4.I.RotatedY(-0.5).RotatedX(-0.3).Scaled(0.03125, 0.125, 0.6125);
+
+
+
 
 
             World w = new World(floor, back_wall, middle, right, left);
@@ -64,22 +146,39 @@ namespace RayTracingCS
             //w.lights.Add(new PointLight(new Point( 10, 10, -10), new Color(0.66, 0.66, 0.66)));
 
 
-            Camera c = new Camera(7680/8, 4320/8, Math.PI / 3);
+            Camera c = new Camera(7680/16, 4320/16, Math.PI / 3);
             c.transform = MatMaths.ViewTransform(new Point(0, 1.5, -5), new Point(0, 1, 0), new Vector(0, 1, 0));
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
             
-            Canvas canvas = c.Render(w);
+
+
+
+
+
+            canvas = c.Render(w);
+            isDone = true;
+
+
+
+
+
+
+
+
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs);
 
             watch = System.Diagnostics.Stopwatch.StartNew();
-            canvas.ToPPM();
+            //canvas.ToPPM();
+            //canvas.ToWindow();s
             watch.Stop();
             elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs);
+
+
 
 
 

@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace RayTracingCS
 {
     public class Canvas
     {
         public readonly int width, height;
-        Color[,] canvas;
-
+        public Color[,] canvas;
+        public rtWindow win = null;
         public Color this[int row, int col]
         {
             get => canvas[row, col]; 
@@ -25,6 +26,7 @@ namespace RayTracingCS
 
         }
 
+
         public void Flush(in Color color)
         {
             for (int row = 0; row < height; row++)
@@ -34,9 +36,9 @@ namespace RayTracingCS
 
         public void WritePixel(int row, int col, in Color c)
         {
-#if DEBUG
-            Console.WriteLine($"Writing to ({row},{col})");
-#endif
+//#if DEBUG
+//            Console.WriteLine($"Writing to ({row},{col})");
+//#endif
 
             if (col >= width || col < 0 || row >= height || row < 0) 
                 return;
@@ -64,13 +66,35 @@ namespace RayTracingCS
 
             System.IO.File.WriteAllText("canvas.ppm", sb.ToString());
         }
+
+        public void ToWindow()
+        {
+            var window = new rtWindow(width, height);
+            //window.Show();
+            Application app = new Application();
+            app.Run(window);
+
+            var w = (rtWindow)app.Windows[0];
+
+            for (int row = 0; row < height; row++)
+                for (int col = 0; col < width; col++) {
+                    int index = (row * width + col) * 3;
+                    window.WriteAt(index + 0, (byte)canvas[row, col].r);
+                    window.WriteAt(index + 1, (byte)canvas[row, col].g);
+                    window.WriteAt(index + 2, (byte)canvas[row, col].b);
+                }
+            window.SetImage();
+
+
+        }
+
         private void Clamp(ref Color c)
         {
             c.r = Math.Clamp(c.r, 0, 255);
             c.g = Math.Clamp(c.g, 0, 255);
             c.b = Math.Clamp(c.b, 0, 255);
         }
-        private Color ClampR(in Color c)
+        public static Color ClampR(in Color c)
         {
             return new Color(Math.Clamp(c.r, 0, 255), Math.Clamp(c.g, 0, 255), Math.Clamp(c.b, 0, 255));
             

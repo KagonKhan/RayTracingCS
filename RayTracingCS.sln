@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RayTracingCS", "RayTracingCS\RayTracingCS.csproj", "{58B46DA1-9135-4300-AB9F-DACF9424DAEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayTracingCS.UnitTests", "RayTracingCS.UnitTests\RayTracingCS.UnitTests.csproj", "{408764E9-AEAF-4082-8DA0-6E12F19D4936}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RayTracingCS.UnitTests", "RayTracingCS.UnitTests\RayTracingCS.UnitTests.csproj", "{408764E9-AEAF-4082-8DA0-6E12F19D4936}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rtWindow", "rtWindow\rtWindow.csproj", "{3127FB4D-11F4-4E6B-8B51-168A6ACB7F69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{408764E9-AEAF-4082-8DA0-6E12F19D4936}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{408764E9-AEAF-4082-8DA0-6E12F19D4936}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{408764E9-AEAF-4082-8DA0-6E12F19D4936}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3127FB4D-11F4-4E6B-8B51-168A6ACB7F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3127FB4D-11F4-4E6B-8B51-168A6ACB7F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3127FB4D-11F4-4E6B-8B51-168A6ACB7F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3127FB4D-11F4-4E6B-8B51-168A6ACB7F69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

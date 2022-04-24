@@ -272,7 +272,7 @@ namespace RayTracingCS
             Canvas retVal = new Canvas(height, width);
 
             Ray r;
-            Color c;
+            Color c; 
 
             for(int row = 0; row < height; row++)
                 for(int col = 0; col < width; col++)
@@ -292,5 +292,21 @@ namespace RayTracingCS
         }
 
 
+        static int row = 0, col = 0;
+        public Color RenderRealTime(in World w)
+        {
+
+            Ray r = Ray(row, col);
+            Color c = w.Coloring(r);
+
+            col++;
+            if(col >= width)
+            {
+                col = 0;
+                row++;
+            }
+
+            return c;
+        }
     }
 }
