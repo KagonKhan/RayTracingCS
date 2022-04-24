@@ -308,5 +308,13 @@ namespace RayTracingCS
 
             return c;
         }
+        public Color RenderRealTime(int y, int x, in World w)
+        {
+
+            Ray r = Ray(y, x);
+            Color c = w.Coloring(r);
+
+            return c;
+        }
     }
 }

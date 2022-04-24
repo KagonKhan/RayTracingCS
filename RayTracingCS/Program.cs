@@ -74,9 +74,12 @@ namespace RayTracingCS
 
         static public Color RenderRealTime()
         {
-
             return Canvas.ClampR(c.RenderRealTime(w) * 255);
+        }
 
+        static public Color RenderRealTime(int y, int x)
+        {
+            return Canvas.ClampR(c.RenderRealTime(y, x, w) * 255);
         }
         public static void Main()
         {

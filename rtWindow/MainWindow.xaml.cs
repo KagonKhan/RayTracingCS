@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace rtWindow
 {
@@ -21,51 +22,62 @@ namespace rtWindow
     public partial class MainWindow : Window
     {
        
-        WriteableBitmap writeableBitmap;
+        WriteableBitmap image;
         byte[] pixels;
         int width, height;
+
+        int row, col;
+
+        public DispatcherTimer timer = new DispatcherTimer();
 
         public MainWindow()
         {
             InitializeComponent();
-            width = 7600 / 16;
-            height = 4320 / 16;
+            width = 7680 / 4;
+            height = 4320 / 4;
+
             RayTracingCS.Program.InitRealTime(width, height);
 
 
 
-            CreateImage();
-            Render();
-            SetImage();
+
+            for(int i = 0; i < 16; i++)
+                timer.Tick += Render;
+            timer.Tick += Write;
+
+            image = new WriteableBitmap(width, height, 96, 96, PixelFormats.Rgb24, null);
+            pixels = new byte[width * height * 3];
+            wImage.Source = image;
+
+
+            timer.Start();
         }
-        void CreateImage()
+
+        void Render(object sender, EventArgs e)
         {
-            writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Rgb24, null);
-            pixels = new byte[(int)(width * height * 3)];
-        }
-        void Render()
-        {
-            for (int row = 0; row < height; row++)
+
+            if (col == width-1 && row == height-1)
+                return;
+
+            if(++col == width)
             {
-                for (int col = 0; col < width; col++)
-                {
-                    int index = (row * width + col) * 3;
-                    RayTracingCS.Color color = RayTracingCS.Program.RenderRealTime();
-
-                    pixels[index + 0] = (byte)color.r;
-                    pixels[index + 1] = (byte)color.g;
-                    pixels[index + 2] = (byte)color.b;
-
-
-                }
-                SetImage();
+                row++;
+                col = 0;
             }
+
+
+
+            int index = (row * width + col) * 3;
+            RayTracingCS.Color color = RayTracingCS.Program.RenderRealTime();
+            pixels[index + 0] = (byte)color.r;
+            pixels[index + 1] = (byte)color.g;
+            pixels[index + 2] = (byte)color.b;
+
         }
 
-        public void SetImage()
+        void Write(object sender, EventArgs e)
         {
-            writeableBitmap.WritePixels(new Int32Rect(0, 0, width, height), pixels, width * 3, 0, 0);
-            image.Source = writeableBitmap;
+            image.WritePixels(new Int32Rect(0, 0, width, height), pixels, width * 3, 0, 0);
         }
     }
 }
