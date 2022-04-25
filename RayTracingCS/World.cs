@@ -38,10 +38,13 @@ namespace RayTracingCS
         public HitObject obj;
         public Point point;
         public Point over_point;
+        public Point under_point;
         public Vector eye;
         public Vector normal;
+        public Vector reflect;
         public bool inside;
 
+        public double n1, n2;
         public Computations(double t, in HitObject obj, in Point p, in Vector eye, in Vector norm, bool inside)
         {
             this.t = t;
@@ -52,7 +55,11 @@ namespace RayTracingCS
             this.inside = inside;
             this.over_point = p;
 
-            over_point = p + normal * (MatMaths.eps);
+            over_point  = p + normal * (MatMaths.eps);
+            under_point = p - normal * (MatMaths.eps);
+            reflect = Vector.Reflect(-eye, normal);
+
+            n1 = n2 = 0;
         }
     }
 
@@ -94,8 +101,9 @@ namespace RayTracingCS
             return null;
         }
 
-        public Computations Compute(in Ray r)
+        public Computations Compute(in Ray r, in List<Intersection> xs = default(List<Intersection>))
         {
+
             var pos = r.position(t);
             var norm = obj.NormalAt(pos);
             bool inside;
@@ -108,13 +116,69 @@ namespace RayTracingCS
             else
                 inside = false;
 
-            return new Computations(t, obj, pos, -r.direction, norm, inside);
+            var retVal =  new Computations(t, obj, pos, -r.direction, norm, inside);
+
+
+
+
+            if (xs == null)
+                return retVal;
+
+
+            var containers = new List<HitObject>();
+
+            for (int i = 0; i < xs.Count; i++)
+            {
+                var xsi = xs[i];
+
+                if (xsi == Hit(xs))
+                {
+                    if(containers.Count == 0)
+                    {
+                        retVal.n1 = 1.0;
+                    }
+                    else
+                    {
+                        retVal.n1 = containers.Last().material.refraction;
+                    }
+                }
+
+                if(containers.Contains(xsi.obj))
+                {
+                    containers.Remove(xsi.obj);
+                }
+                else
+                {
+                    containers.Add(xsi.obj);
+                }
+
+                if (xsi == Hit(xs))
+                {
+                    if (containers.Count == 0)
+                    {
+                        retVal.n2 = 1.0;
+                    }
+                    else
+                    {
+                        retVal.n2 = containers.Last().material.refraction;
+                    }
+
+                    break;
+                }
+            }
+
+
+
+            return retVal;
         }
     }
 
 
     public class World
     {
+
+        const int depth = 20;
+
         // Possibly a dictionary with IDs
         public LinkedList<HitObject> objects = new LinkedList<HitObject>();
         public List<Light> lights = new List<Light>();
@@ -163,7 +227,7 @@ namespace RayTracingCS
             return retVal;
         }
 
-        public Color Shading(in Computations comp)
+        public Color Shading(in Computations comp, int remaining)
         {
             Color retVal = Color.Black;
 
@@ -176,10 +240,50 @@ namespace RayTracingCS
                 lightIndex++;
             }
 
-            return retVal;
+            var reflected = ReflectiveShading(comp, remaining);
+            var refracted = RefractiveShading(comp, remaining);
+
+            return retVal + reflected + refracted;
+        }
+        public Color ReflectiveShading(in Computations comp, int remaining)
+        {
+
+            if (comp.obj.material.reflective == 0 || remaining <=0)
+                return new Color(0, 0, 0);
+            
+
+
+            var reflect_ray = new Ray(comp.over_point, comp.reflect);
+            Color color = Coloring(reflect_ray, remaining - 1);
+
+            return color * comp.obj.material.reflective;
+        }
+        public Color RefractiveShading(in Computations comp, int remaining)
+        {
+
+            if (comp.obj.material.transparency == 0 || remaining <= 0)
+                return new Color(0, 0, 0);
+
+
+
+            var ratio = comp.n1 / comp.n2;
+            var cos_i = MatMaths.Dot(comp.eye, comp.normal);
+            var sin_2t = ratio * ratio * (1 - cos_i * cos_i);
+
+            if (sin_2t > 1)
+                return new Color(0, 0, 0);
+
+            var cos_t = Math.Sqrt(1 - sin_2t);
+            var dir = comp.normal * (ratio * cos_i - cos_t) - comp.normal * ratio;
+
+            var ref_ray = new Ray(comp.under_point, dir);
+
+            return Coloring(ref_ray, remaining - 1) * comp.obj.material.transparency;
+
+
         }
     
-        public Color Coloring(in Ray r)
+        public Color Coloring(in Ray r, int remaining = depth)
         {
             var xs = Intersect(r);
             var hit = Intersection.Hit(xs);
@@ -190,8 +294,8 @@ namespace RayTracingCS
                 return Color.Black;
             }
             else {
-                Computations comp = hit.Compute(r);
-                return Shading(comp);
+                Computations comp = hit.Compute(r, xs);
+                return Shading(comp, remaining);
             }
         }
 

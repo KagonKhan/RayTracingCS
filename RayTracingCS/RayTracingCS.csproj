@@ -7,12 +7,5 @@
    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="EPP.PresentationCore" Version="1.0.0" />
-    <PackageReference Include="PresentationFramework" Version="4.6.0" />
-    <PackageReference Include="System.Runtime.WindowsRuntime.UI.Xaml" Version="4.7.0" />
-    <PackageReference Include="WindowsBase_Core.STW" Version="4.0.30319.1" />
-  </ItemGroup>
-
 
 </Project>
