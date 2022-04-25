@@ -11,7 +11,7 @@ namespace RayTracingCS
     {
         public readonly int width, height;
         public Color[,] canvas;
-        public rtWindow win = null;
+
         public Color this[int row, int col]
         {
             get => canvas[row, col]; 
@@ -67,26 +67,6 @@ namespace RayTracingCS
             System.IO.File.WriteAllText("canvas.ppm", sb.ToString());
         }
 
-        public void ToWindow()
-        {
-            var window = new rtWindow(width, height);
-            //window.Show();
-            Application app = new Application();
-            app.Run(window);
-
-            var w = (rtWindow)app.Windows[0];
-
-            for (int row = 0; row < height; row++)
-                for (int col = 0; col < width; col++) {
-                    int index = (row * width + col) * 3;
-                    window.WriteAt(index + 0, (byte)canvas[row, col].r);
-                    window.WriteAt(index + 1, (byte)canvas[row, col].g);
-                    window.WriteAt(index + 2, (byte)canvas[row, col].b);
-                }
-            window.SetImage();
-
-
-        }
 
         private void Clamp(ref Color c)
         {

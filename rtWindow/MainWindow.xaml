@@ -22,7 +22,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
-
-        <Image x:Name="wImage" Grid.Row="1" Grid.RowSpan="5" Grid.Column="1" Grid.ColumnSpan="5"/>
+        <Label x:Name="timetext" Grid.Row="1" Grid.Column="1" Content="timer"/>
+        <Image x:Name="wImage" Grid.Row="2" Grid.RowSpan="3" Grid.Column="1" Grid.ColumnSpan="4"/>
     </Grid>
 </Window>
