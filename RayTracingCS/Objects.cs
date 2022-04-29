@@ -37,7 +37,7 @@ namespace RayTracingCS
 
         public List<Intersection> IntersectionsWith(in Ray ray)
         {
-            var r = ray.Transform(Transformation.Inversed());
+            Ray r = ray.Transform(Transformation.Inversed());
             return LocalIntersectionsWith(r);
         }
     }
@@ -52,21 +52,23 @@ namespace RayTracingCS
         protected override List<Intersection> LocalIntersectionsWith(in Ray ray)
         {
 
-            var sphereToRay = ray.origin - new Point(0, 0, 0);
-    
-            var a = ray.direction.Dot(ray.direction);
-            var b = 2 * ray.direction.Dot(sphereToRay);
-            var c = sphereToRay.Dot(sphereToRay) - 1;
+            Vector sphereToRay = ray.origin - new Point(0, 0, 0);
 
-            var delta = b * b - 4 * a * c;
+            double a = ray.direction.Dot(ray.direction);
+            double b = 2 * ray.direction.Dot(sphereToRay);
+            double c = sphereToRay.Dot(sphereToRay) - 1;
+
+            double delta = b * b - 4 * a * c;
     
             if (delta < 0)
                 return new List<Intersection>();
             else
             {
-                var t1 = (-b - Math.Sqrt(delta)) / (2 * a);
-                var t2 = (-b + Math.Sqrt(delta)) / (2 * a);
-        
+                double t1 = (-b - Math.Sqrt(delta)) / (2 * a);
+                double t2 = (-b + Math.Sqrt(delta)) / (2 * a);
+
+
+                Console.WriteLine(t1 + ", " + t2);
                 return new List<Intersection> { new(this, t1), new(this, t2) };
             }
         }

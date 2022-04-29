@@ -619,18 +619,148 @@ namespace RayTracingCS.UnitTests
         [Fact]
         public void LightingTests()
         {
+            var m = new Material();
+            var pos = new Point(0, 0, 0);
+            var eye = new Vector(0, 0, -1);
+            var normal = new Vector(0, 0, -1);
             var l = new PointLight(new Point(0, 0, -10), new Color(1, 1, 1));
-            //var res = l.Lighting(Material)
+           
+            var res = l.Lighting(m, new Sphere(), pos, eye, normal);
+            Assert.Equal(new Color(1.9, 1.9, 1.9), res);
 
-            // TODO: Finish tests
+
+            l = new PointLight(new Point(0, 10, -10), new Color(1, 1, 1));
+            res = l.Lighting(m, new Sphere(), pos, eye, normal);
+            Assert.Equal(new Color(0.7364, 0.7364, 0.7364), res);
+
+
+
+
+            double s22 = Math.Sqrt(2) / 2d;
+            eye = new Vector(0,s22,-s22);
+            l = new PointLight(new Point(0, 0, -10), new Color(1, 1, 1));
+
+            res = l.Lighting(m, new Sphere(), pos, eye, normal);
+            Assert.Equal(new Color(1.0,1.0,1.0), res);
+            
+
+
+
+
+  
+            eye = new Vector(0,-s22,-s22);
+            l = new PointLight(new Point(0, 10, -10), new Color(1, 1, 1));
+
+            res = l.Lighting(m, new Sphere(), pos, eye, normal);
+            Assert.Equal(new Color(1.6364, 1.6364, 1.6364), res);
+
+
+
+
+
+
+
+            eye = new Vector(0, 0, -1);
+            l = new PointLight(new Point(0, 0, 10), new Color(1, 1, 1));
+            res = l.Lighting(m, new Sphere(), pos, eye, normal);
+            Assert.Equal(new Color(0.1, 0.1, 0.1), res);
+
+
         }
         [Fact]
         public void ShadowTests()
         {
 
+            //There is no shadow when nothing is collinear with point and light
+            var w = new World();
+            var p = new Point(0, 10, 0);
+
+            var res = w.IsShadowed(p, 0);
+            Assert.False(res);
+
+
+
+            //The shadow when an object is between the point and the light
+            p = new Point(10, -10, 10);
+
+            res = w.IsShadowed(p, 0);
+            Assert.True(res);
+
+
+
+            //There is no shadow when an object is behind the light
+            p = new Point(-20, 20, -20);
+
+            res = w.IsShadowed(p, 0);
+            Assert.False(res);
+
+
+
+
+            //There is no shadow when an object is behind the point
+            p = new Point(-2, 2, -2);
+
+            res = w.IsShadowed(p, 0);
+            Assert.False(res);
+        }
+
+        [Fact]
+        public void ShadeHits()
+        {
+            //shade_hit() is given an intersection in shadow
+            var s1 = new Sphere();
+            var s2 = new Sphere();
+            s2.Transformation = Mat4.I.Translated(0, 0, 10);
+            
+            var l = new PointLight(new Point(0, 0, -10), new Color(1, 1, 1));
+            var w = new World(s1,s2);
+            w.lights.Add(l);
+
+
+            var r = new Ray(new Point(0, 0, 5), new Vector(0, 0, 1));
+            var i = new Intersection(s2, 4);
+            var comps = i.Compute(r);
+            var c = w.Shading(comps, 0);
+
+            Assert.Equal(new Color(0.1, 0.1, 0.1), c);
+
+
+
+
+            //The hit should offset the point
+            r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            s1 = new Sphere();
+            s1.Transformation = Mat4.I.Translated(0, 0, 1);
+            w.objects.Clear();
+            w.objects.AddLast(s1);
+
+
+            i = new Intersection(s1, 5);
+            comps = i.Compute(r);
+
+            Assert.True(comps.over_point.Z < -MatMaths.eps/2);
+            Assert.True(comps.point.Z > comps.over_point.Z);
         }
     }
 
+    public class ObjectTests
+    {
+        [Fact]
+        public void ObjectCreationTests()
+        {
+            //The default transformation
+            HitObject s = new Sphere();
+            Assert.Equal(Mat4.I, s.Transformation);
+
+
+            //Assigning a transformation
+            s.Transformation = Mat4.I.Translated(2, 3, 4);
+            Assert.Equal(MatMaths.Translation(2,3,4), s.Transformation);
+
+
+            //The default material
+        }
+    }
 
     public class SceneTests
     {
@@ -713,18 +843,19 @@ namespace RayTracingCS.UnitTests
             var s = w.objects.First.Value;
             var i = new Intersection(s, 4);
             var comps = i.Compute(r);
-            var shade = w.Shading(comps);
+            var shade = w.Shading(comps, 0);
 
             Assert.Equal(new Color(0.38066, 0.47583, 0.2855), shade);
 
-
+            w.lights.Clear();
 
             w.lights.Add(new PointLight(new Point(0f, 0.25f, 0f), new Color(1f, 1f, 1f)));
             r = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
             s = w.objects.First.Next.Value;
             i = new Intersection(s, 0.5);
+
             comps = i.Compute(r);
-            shade = w.Shading(comps);
+            shade = w.Shading(comps, 0);
 
             Assert.Equal(new Color(0.90498, 0.90498, 0.90498), shade);
 
@@ -829,9 +960,9 @@ namespace RayTracingCS.UnitTests
         {
             var pi = Math.PI;
             var c = new Camera(201, 101, pi / 2);
-            var r = c.Ray(100, 50);
+            var r = c.Ray(50, 100);
 
-            Assert.Equal(new Point(0, 0, 0), r.origin);
+            Assert.Equal(new Point(0, 0, 0),   r.origin);
             Assert.Equal(new Vector(0, 0, -1), r.direction);
 
 
@@ -844,7 +975,7 @@ namespace RayTracingCS.UnitTests
 
 
             c.transform = MatMaths.RotationY(pi / 4) * MatMaths.Translation(0, -2, 5);
-            r = c.Ray(100, 50);
+            r = c.Ray(50, 100);
             var s22 = Math.Sqrt(2) / 2d;
 
             Assert.Equal(new Point(0, 2, -5), r.origin);

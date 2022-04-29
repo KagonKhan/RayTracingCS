@@ -44,14 +44,14 @@ namespace RayTracingCS
                 return;
 
 
-            canvas[row, col] = ClampR(c * 255);
+            canvas[row, col] = ClampR(c);
         }
 
         // Artifacts: no space after color values in file
 
         public void ToPPM()
         {
-            var sb = new System.Text.StringBuilder();
+            StringBuilder sb = new System.Text.StringBuilder();
             sb.Append($"P3\n{width} {height}\n255\n");
 
             for (int row = 0; row < height; row++)

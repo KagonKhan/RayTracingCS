@@ -18,77 +18,128 @@ namespace RayTracingCS
 
         static public void InitRealTime(int width, int height)
         {
+            var wall_material = new Material();
+            wall_material.pattern = new StripePattern(new SolidColorPattern(0.45, 0.45, 0.45), new SolidColorPattern(0.55, 0.55, 0.55));
+            wall_material.pattern.Transformation = Mat4.I.RotatedY(1.5708).Scaled(0.25, 0.25, 0.25);
+            wall_material.ambient = 0;
+            wall_material.diffuse = 0.4f;
+            wall_material.specular = 0;
+            wall_material.reflective = 0.3;
+
+
             Plane floor = new Plane();
-            floor.Transformation = MatMaths.Translation(0,-1,0);
+            floor.Transformation = MatMaths.I.RotatedY(0.31415);
             floor.material = new Material();
-            floor.material.color = new Color(1, 1, 1);
+            floor.material.pattern = new Checkered2DPattern(new SolidColorPattern(0.35, 0.35, 0.35), new SolidColorPattern(0.65, 0.65, 0.65));
             floor.material.specular = 0;
-            floor.material.reflective = 0;
+            floor.material.reflective = 0.4;
+
+            Plane ceiling = new Plane();
+            ceiling.Transformation = MatMaths.I.Translated(0,5,0);
+            ceiling.material = new Material();
+            ceiling.material.color = new Color(0.8, 0.8, 0.8); 
+            ceiling.material.ambient = 0.3f;
+            ceiling.material.specular = 0;
+
+
+            Plane left_wall = new Plane();
+            left_wall.Transformation = MatMaths.I.Translated(-5, 0, 0).RotatedY(1.5708).RotatedZ(1.5708);
+            left_wall.material = wall_material;
+
+            Plane right_wall = new Plane();
+            right_wall.Transformation = MatMaths.I.Translated( 5, 0, 0).RotatedY(1.5708).RotatedZ(1.5708);
+            right_wall.material = wall_material;
+            
+
+            Plane front_wall = new Plane();
+            front_wall.Transformation = MatMaths.I.Translated(0, 0, 5).RotatedX(1.5708);
+            front_wall.material = wall_material;
 
             Plane back_wall = new Plane();
-            back_wall.Transformation = MatMaths.I.Translated(0, 2, 0.5).RotatedX(pi / 2);
-            back_wall.material = new Material();
-            back_wall.material.color = new Color(1, 1, 1);
-            back_wall.material.specular = 0;
-            back_wall.material.reflective = 0.7;
+            back_wall.Transformation = MatMaths.I.Translated( 0, 0, -5).RotatedX(1.5708);
+            back_wall.material = wall_material;
 
 
-            Sphere middle = new Sphere();
-            middle.Transformation = MatMaths.Translation(0, 1.9, -1.5);
-            middle.material = new Material();
-            middle.material.color = new Color(0.1, 0.1, 0.1);
-            middle.material.ambient = 0.5f;
-            middle.material.transparency = 1.0;
-            middle.material.refraction = 1.5;
-
-
-
-
-
-
-
-            Sphere right = new Sphere();
-            right.Transformation = MatMaths.I.Translated(3, 0.5, -1.5).Scaled(0.25, 0.25, 0.25);
-            right.material = new Material();
-            right.material.color = new Color(1, 1, 1);
-            right.material.diffuse = 0.7f;
-            right.material.transparency = 0.3;
-            right.material.refraction = 1.00029;
-
-
-
-            Sphere left = new Sphere();
-            left.Transformation = MatMaths.I.Translated(-1.5, 0.33, -0.75).Scaled(0.33, 0.33, 0.33);
-            left.material = new Material();
-            left.material.color = new Color(1, 0.8, 0.1);
-            left.material.diffuse = 0.7f;
-            left.material.specular = 0.3f;
-            left.material.reflective = 0.5;
-
-
-            var one = new StripePattern(Pattern.Black, Pattern.White);
-            var two = new StripePattern(Pattern.White, Pattern.Black);
-            two.Transformation = Mat4.I.RotatedY(pi / 2);
-
-            //back_wall.material.pattern = new NestedPattern(one,two);
-            //floor.material.pattern = new Checkered2DPattern(Pattern.Black, Pattern.White);
-            back_wall.material.pattern = new RadialGradientPattern(Pattern.Black, Pattern.White);
-            left.material.pattern = new RadialGradientPattern(new SolidColorPattern(1, 0, 1), new SolidColorPattern(0, 1, 1));
-            right.material.pattern = new NestedPattern(new StripePattern(Pattern.Cyan, Pattern.Magenta), new RingPattern(Pattern.Maroon, Pattern.Gray));
-            //middle.material.pattern = new NestedPattern(new StripePattern(Pattern.Cyan, Pattern.Magenta), new RingPattern(Pattern.Maroon, Pattern.Gray));
-            //middle.material.pattern.Transformation = Mat4.I.RotatedY(-0.5).RotatedX(-0.3).Scaled(0.03125, 0.125, 0.6125);
+            Sphere s1 = new Sphere();
+            s1.Transformation = Mat4.I.Translated(4.6, 0.4, 1).Scaled(0.4, 0.4, 0.4) ;
+            s1.material = new Material();
+            s1.material.color = new Color(0.8, 0.5, 0.3);
+            s1.material.shininess = 50f;
+            
+            Sphere s2 = new Sphere();
+            s2.Transformation = Mat4.I.Translated(4.7, 0.3, 0.4).Scaled(0.3, 0.3, 0.3);
+            s2.material = new Material();
+            s2.material.color = new Color(0.9, 0.4, 0.5);
+            s2.material.shininess = 50f;
+            
+            Sphere s3 = new Sphere();
+            s3.Transformation = Mat4.I.Translated(-1, 0.5, 4.5).Scaled(0.5, 0.5, 0.5);
+            s3.material = new Material();
+            s3.material.color = new Color(0.4, 0.9, 0.6);
+            s3.material.shininess = 50f;
+                        
+            Sphere s4 = new Sphere();
+            s4.Transformation = Mat4.I.Translated(-1.7, 0.3, 4.7).Scaled(0.3, 0.3, 0.3);
+            s4.material = new Material();
+            s4.material.color = new Color(0.4, 0.6, 0.9);
+            s4.material.shininess = 50f;
+                     
+            
 
 
 
 
+            Sphere s5 = new Sphere();
+            s5.Transformation = Mat4.I.Translated(-0.6, 1, 0.6);
+            s5.material = new Material();
+            s5.material.color = new Color(1, 0.3, 0.2);
+            s5.material.shininess = 5f;
+            s5.material.specular = 0.4f;
 
-            w = new World(floor, back_wall, middle, right, left);
-            w.lights.Add(new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1)));
-            //w.lights.Add(new PointLight(new Point( 10, 10, -10), new Color(0.66, 0.66, 0.66)));
+            
+
+            Sphere s6 = new Sphere();
+            s6.Transformation = Mat4.I.Translated(0.6, 0.7, -0.6).Scaled(0.7, 0.7, 0.7);
+            s6.material = new Material();
+            s6.material.color = new Color(0, 0, 0.2);
+            s6.material.ambient = 0.0f;
+            s6.material.diffuse = 0.4f;
+            s6.material.specular = 0.9f;
+            s6.material.shininess = 300f;
+            s6.material.reflective = 0.9;
+            s6.material.transparency = 0.9;
+            s6.material.refraction = 1.5;
 
 
-            c = new Camera(width, height, Math.PI / 3);
-            c.transform = MatMaths.ViewTransform(new Point(0, 2, -7), new Point(0, 1, 0), new Vector(0, 1, 0));
+            Sphere s7 = new Sphere();
+            s7.Transformation = Mat4.I.Translated(-0.7, 0.5, -0.8).Scaled(0.5, 0.5, 0.5);
+            s7.material = new Material();
+            s7.material.color = new Color(0, 0.2, 0);
+            s7.material.ambient = 0.0f;
+            s7.material.diffuse = 0.4f;
+            s7.material.specular = 0.9f;
+            s7.material.shininess = 300f;
+            s7.material.reflective = 0.9;
+            s7.material.transparency = 0.9;
+            s7.material.refraction = 1.5;
+
+
+
+
+
+
+
+
+
+
+
+
+
+            c = new Camera(400, 200, 1.152);
+            c.transform = MatMaths.ViewTransform(new Point(-2.6, 1.5, -3.9), new Point(-0.6, 1, -0.8), new Vector(0, 1, 0));
+
+            w = new World(floor, ceiling, front_wall, left_wall, right_wall, back_wall, s1,s2,s3,s4,s5,s6,s7);
+            w.lights.Add(new PointLight(new Point(-4.9, 4.9, -1), new Color(1, 1, 1)));
         }
 
         static public Color RenderRealTime()
@@ -106,11 +157,11 @@ namespace RayTracingCS
         {
             InitRealTime(7680 / 16, 4320 / 16);
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
                 canvas = c.Render(w);
             watch.Stop();
 
-            var elapsedMs = watch.ElapsedMilliseconds;
+            long elapsedMs = watch.ElapsedMilliseconds;
             Console.WriteLine(elapsedMs);
 
 

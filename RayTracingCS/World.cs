@@ -61,6 +61,27 @@ namespace RayTracingCS
 
             n1 = n2 = 0;
         }
+
+
+        public double Schlick()
+        {
+            double cos = eye.Dot(normal);
+
+            if(n1>n2)
+            {
+                double n = n1 / n2;
+                double sin_2t = n * n * (1 - cos * cos);
+
+                if (sin_2t > 1.0)
+                    return 1.0;
+
+                double cos_t = Math.Sqrt(1.0 - sin_2t);
+                cos = cos_t;
+            }
+
+            double r0 = Math.Pow((n1 - n2) / (n1 + n2), 2);
+            return r0 + (1 - r0) * Math.Pow(1-cos, 5);
+        }
     }
 
 
@@ -104,8 +125,8 @@ namespace RayTracingCS
         public Computations Compute(in Ray r, in List<Intersection> xs = default(List<Intersection>))
         {
 
-            var pos = r.position(t);
-            var norm = obj.NormalAt(pos);
+            Point pos = r.position(t);
+            Vector norm = obj.NormalAt(pos);
             bool inside;
                 
             if (norm.Dot(-r.direction) < 0)
@@ -116,7 +137,7 @@ namespace RayTracingCS
             else
                 inside = false;
 
-            var retVal =  new Computations(t, obj, pos, -r.direction, norm, inside);
+            Computations retVal =  new Computations(t, obj, pos, -r.direction, norm, inside);
 
 
 
@@ -125,11 +146,11 @@ namespace RayTracingCS
                 return retVal;
 
 
-            var containers = new List<HitObject>();
+            List<HitObject> containers = new List<HitObject>();
 
             for (int i = 0; i < xs.Count; i++)
             {
-                var xsi = xs[i];
+                Intersection xsi = xs[i];
 
                 if (xsi == Hit(xs))
                 {
@@ -177,7 +198,7 @@ namespace RayTracingCS
     public class World
     {
 
-        const int depth = 20;
+        const int depth = 0;
 
         // Possibly a dictionary with IDs
         public LinkedList<HitObject> objects = new LinkedList<HitObject>();
@@ -190,15 +211,16 @@ namespace RayTracingCS
         }
         public World()
         {
-            var light = new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1));
-            var s1 = new Sphere();
-            var s2 = new Sphere();
+            PointLight light = new PointLight(new Point(-10, 10, -10), new Color(1, 1, 1));
+            Sphere s1 = new Sphere();
+            Sphere s2 = new Sphere();
 
             s1.material.color = new Color(0.8f, 1.0f, 0.6f);
             s1.material.diffuse = 0.7f;
             s1.material.specular = 0.2f;
 
             s2.Transformation = MatMaths.Scaling(0.5, 0.5, 0.5);
+
 
             lights.Add(light);
             objects.AddLast(s1);
@@ -212,11 +234,11 @@ namespace RayTracingCS
 
             List<Intersection> retVal = new List<Intersection>();
 
-            foreach (var item in objects)
+            foreach (HitObject item in objects)
             {
-                var xs = item.IntersectionsWith(r);
+                List<Intersection> xs = item.IntersectionsWith(r);
 
-                if (xs != null)
+                if (xs.Count != 0)
                 {
                     retVal.AddRange(xs);
                 }
@@ -232,7 +254,7 @@ namespace RayTracingCS
             Color retVal = Color.Black;
 
             int lightIndex = 0;
-            foreach (var light in lights)
+            foreach (Light light in lights)
             {
                 bool shaded = IsShadowed(comp.over_point, lightIndex);
                 retVal += light.Lighting(comp.obj.material, comp.obj, comp.point, comp.eye, comp.normal, shaded);
@@ -240,8 +262,16 @@ namespace RayTracingCS
                 lightIndex++;
             }
 
-            var reflected = ReflectiveShading(comp, remaining);
-            var refracted = RefractiveShading(comp, remaining);
+            Color reflected = ReflectiveShading(comp, remaining);
+            Color refracted = RefractiveShading(comp, remaining);
+
+            Material mat = comp.obj.material;
+
+            if(mat.reflective > 0 && mat.transparency > 0)
+            {
+                double reflectance = comp.Schlick();
+                return retVal + (reflected * reflectance) + (refracted * (1 - reflectance));
+            }
 
             return retVal + reflected + refracted;
         }
@@ -250,10 +280,10 @@ namespace RayTracingCS
 
             if (comp.obj.material.reflective == 0 || remaining <=0)
                 return new Color(0, 0, 0);
-            
 
 
-            var reflect_ray = new Ray(comp.over_point, comp.reflect);
+
+            Ray reflect_ray = new Ray(comp.over_point, comp.reflect);
             Color color = Coloring(reflect_ray, remaining - 1);
 
             return color * comp.obj.material.reflective;
@@ -266,17 +296,17 @@ namespace RayTracingCS
 
 
 
-            var ratio = comp.n1 / comp.n2;
-            var cos_i = MatMaths.Dot(comp.eye, comp.normal);
-            var sin_2t = ratio * ratio * (1 - cos_i * cos_i);
+            double ratio = comp.n1 / comp.n2;
+            double cos_i = MatMaths.Dot(comp.eye, comp.normal);
+            double sin_2t = ratio * ratio * (1 - cos_i * cos_i);
 
             if (sin_2t > 1)
                 return new Color(0, 0, 0);
 
-            var cos_t = Math.Sqrt(1 - sin_2t);
-            var dir = comp.normal * (ratio * cos_i - cos_t) - comp.normal * ratio;
+            double cos_t = Math.Sqrt(1 - sin_2t);
+            Vector dir = comp.normal * (ratio * cos_i - cos_t) - comp.normal * ratio;
 
-            var ref_ray = new Ray(comp.under_point, dir);
+            Ray ref_ray = new Ray(comp.under_point, dir);
 
             return Coloring(ref_ray, remaining - 1) * comp.obj.material.transparency;
 
@@ -285,8 +315,8 @@ namespace RayTracingCS
     
         public Color Coloring(in Ray r, int remaining = depth)
         {
-            var xs = Intersect(r);
-            var hit = Intersection.Hit(xs);
+            List<Intersection> xs = Intersect(r);
+            Intersection hit = Intersection.Hit(xs);
 
 
             if (hit == null)
@@ -309,8 +339,8 @@ namespace RayTracingCS
 
             Ray r = new Ray(p, direction);
 
-            var xs = Intersect(r);
-            var h = Intersection.Hit(xs);
+            List<Intersection> xs = Intersect(r);
+            Intersection h = Intersection.Hit(xs);
 
             if (h != null && h.t < distance)
                 return true;
@@ -337,7 +367,7 @@ namespace RayTracingCS
             this.fov = fov;
             transform = MatMaths.I;
 
-            var half_view = Math.Tan(fov / 2);
+            double half_view = Math.Tan(fov / 2);
             double aspect = (double)width / height;
 
             if (aspect >= 1)
@@ -351,22 +381,22 @@ namespace RayTracingCS
                 halfHeight = half_view;
             }
 
-            pxsize = 2d * halfWidth / width;
+            pxsize = 2 * halfWidth / width;
         }
 
         public Ray Ray(int row, int col)
         {
-            var xoffset = (col + 0.5) * pxsize;
-            var yoffset = (row + 0.5) * pxsize;
+            double xoffset = (col + 0.5) * pxsize;
+            double yoffset = (row + 0.5) * pxsize;
 
-            var world_x = halfWidth - xoffset;
-            var world_y = halfHeight - yoffset;
+            double world_x = halfWidth - xoffset;
+            double world_y = halfHeight - yoffset;
 
-            var camInverse = transform.Inversed();
+            Mat4 camInverse = transform.Inversed();
 
-            var pixel = camInverse * new Point(world_x, world_y, -1);
-            var origin = camInverse * new Point(0, 0, 0);
-            var dir = (pixel - origin).Normalized();
+            Point pixel = camInverse * new Point(world_x, world_y, -1);
+            Point origin = camInverse * new Point(0, 0, 0);
+            Vector dir = (pixel - origin).Normalized();
 
             return new Ray(origin, dir);
         }

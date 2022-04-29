@@ -26,18 +26,18 @@ namespace RayTracingCS
         }
         public override Color Lighting(in Material m, in HitObject obj, in Point p, in Vector eye, in Vector norm, bool shadowed = false)
         {
-            var eff_color = (m.pattern != null) ? m.pattern.GetOnObject(p, obj) : m.color;
+            Color eff_color = (m.pattern != null) ? m.pattern.GetOnObject(p, obj) : m.color;
             eff_color *= intensity;
 
-            var ambient = eff_color * m.ambient;
+            Color ambient = eff_color * m.ambient;
 
 
-            var lightV = MatMaths.Norm(pos - p);
+            Vector lightV = MatMaths.Norm(pos - p);
 
             Color dif;
             Color spec;
 
-            var light_dot_normal = MatMaths.Dot(lightV, norm);
+            double light_dot_normal = MatMaths.Dot(lightV, norm);
             if (light_dot_normal < 0 || shadowed)
             {
                 dif = Color.Black;
@@ -47,14 +47,14 @@ namespace RayTracingCS
             {
                 dif = eff_color * m.diffuse * light_dot_normal;
 
-                var reflectv = Vector.Reflect(-lightV, norm);
-                var reflect_dot_eye = MatMaths.Dot(reflectv, eye);
+                Vector reflectv = Vector.Reflect(-lightV, norm);
+                double reflect_dot_eye = MatMaths.Dot(reflectv, eye);
 
                 if (reflect_dot_eye <= 0)
                     spec = Color.Black;
                 else
                 {
-                    var factor = Math.Pow(reflect_dot_eye, m.shininess);
+                    double factor = Math.Pow(reflect_dot_eye, m.shininess);
                     spec = intensity * m.specular * factor;
 
                 }

@@ -9,7 +9,7 @@ namespace RayTracingCS
 
     public static class MatMaths
     {
-        public static int SpaceshipOp(double a, double b) => a > b ? 1 : a == b ? 0 : -1;
+        public static int SpaceshipOp(double? a, double? b) => a > b ? 1 : a == b ? 0 : -1;
 
 
 

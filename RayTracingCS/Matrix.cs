@@ -26,7 +26,7 @@ namespace RayTracingCS
 
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             for (int row = 0; row < dim; row++)
             {
                 for (int col = 0; col < dim; col++)
@@ -294,6 +294,9 @@ namespace RayTracingCS
         // Copies original matrix
         public Mat4 Inversed()
         {
+            if (Inversible() == false)
+                ;// throw new Exception();
+
             Mat4 retVal = new Mat4(I);
             Mat4 a      = new Mat4(this);
 
