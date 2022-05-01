@@ -5,7 +5,7 @@
     - Vectors.
     - Colors
     - Matrices (2x2, 3x3, 4x4).
-    - Matrix inverse using Adjoints(slower) and 4x4 using Augmented matrix (M|I)(faster).
+    - Matrix inverse using Adjoints(slower) and 4x4 using Augmented matrix (M &#124; I)(faster).
     - Transformations.
 - Shadows.
 - Multiple light sources.
