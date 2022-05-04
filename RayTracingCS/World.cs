@@ -405,13 +405,12 @@ namespace RayTracingCS
         {
             Canvas retVal = new Canvas(height, width);
 
-            Ray r;
             Color c; 
 
             for(int row = 0; row < height; row++)
                 for(int col = 0; col < width; col++)
                 {
-                    r = Ray(row, col);
+                    Ray r = Ray(row, col);
                     c = w.Coloring(r);
 
                     retVal.WritePixel(row, col, c);

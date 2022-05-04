@@ -33,8 +33,6 @@ namespace RayTracingCS
             refraction = refr;
         }
 
-
-
         public Material()
         {
             color = new Color(1, 1, 1);
@@ -44,35 +42,51 @@ namespace RayTracingCS
             shininess = 200f;
             pattern = null;
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Material m)
+            {
+                return ambient == m.ambient
+                    && diffuse == m.diffuse
+                    && specular == m.specular
+                    && shininess == m.shininess
+                    && color == m.color
+                    && pattern == m.pattern
+                    && reflective == m.reflective
+                    && transparency == m.transparency
+                    && refraction == m.refraction;         
+            }
+
+            return false;
+        }
+
     }
 
     public abstract class Pattern
     {
+        public Color a, b;
+        
         public Mat4 Transformation = new Mat4(MatMaths.I);
 
         #region Solid Color constants
-        static public readonly SolidColorPattern red        = new(1, 0, 0);
-        static public readonly SolidColorPattern Black      = new(0, 0, 0);
-        static public readonly SolidColorPattern White      = new(1, 1, 1);
-        static public readonly SolidColorPattern Red        = new(1, 0, 0);
-        static public readonly SolidColorPattern Lime       = new(0, 1, 0);
-        static public readonly SolidColorPattern Blue       = new(0, 0, 1);
-        static public readonly SolidColorPattern Yellow     = new(1, 1, 0);
-        static public readonly SolidColorPattern Cyan       = new(0, 1, 1);
-        static public readonly SolidColorPattern Magenta    = new(1, 0, 1);
-        static public readonly SolidColorPattern Silver     = new(0.75, 0.75, 0.75);
-        static public readonly SolidColorPattern Gray       = new(0.5, 0.5, 0.5);
-        static public readonly SolidColorPattern Maroon     = new(0.5, 0, 0);
-        static public readonly SolidColorPattern Olive      = new(0.5, 0.5, 0);
-        static public readonly SolidColorPattern Green      = new(0, 0.5, 0);
-        static public readonly SolidColorPattern Purple     = new(0.5, 0, 0.5);
-        static public readonly SolidColorPattern Teal       = new(0, 0.5, 0.5);
-        static public readonly SolidColorPattern Navy       = new(0, 0, 0.5);
+        static public readonly Color Black      = new(0, 0, 0);
+        static public readonly Color White      = new(1, 1, 1);
+        static public readonly Color Red        = new(1, 0, 0);
+        static public readonly Color Lime       = new(0, 1, 0);
+        static public readonly Color Blue       = new(0, 0, 1);
+        static public readonly Color Yellow     = new(1, 1, 0);
+        static public readonly Color Cyan       = new(0, 1, 1);
+        static public readonly Color Magenta    = new(1, 0, 1);
+        static public readonly Color Silver     = new(0.75, 0.75, 0.75);
+        static public readonly Color Gray       = new(0.5, 0.5, 0.5);
+        static public readonly Color Maroon     = new(0.5, 0, 0);
+        static public readonly Color Olive      = new(0.5, 0.5, 0);
+        static public readonly Color Green      = new(0, 0.5, 0);
+        static public readonly Color Purple     = new(0.5, 0, 0.5);
+        static public readonly Color Teal       = new(0, 0.5, 0.5);
+        static public readonly Color Navy       = new(0, 0, 0.5);
         #endregion
-
-
-
-
 
 
         protected Pattern() { }
@@ -107,8 +121,7 @@ namespace RayTracingCS
 
     public class StripePattern : Pattern
     {
-        Pattern a, b;
-        public StripePattern(in Pattern a, in Pattern b)
+        public StripePattern(in Color a, in Color b)
         {
             this.a = a;
             this.b = b;
@@ -116,26 +129,24 @@ namespace RayTracingCS
         public override Color Get(in Point p, params double[] param)
         {
             Point tp = Transformation.Inversed() * p;
-            return Math.Floor(tp.X) % 2 == 0 ? a.Get(tp, param) : b.Get(tp, param);
+            return Math.Floor(tp.X) % 2 == 0 ? a : b;
         }
     }
     public class GradientPattern : Pattern
     {
-        Pattern a, b;
-        public GradientPattern(in Pattern a, in Pattern b)
+        public GradientPattern(in Color a, in Color b)
         {
             this.a = a;
             this.b = b;
         }
         public override Color Get(in Point p, params double[] param)
         {
-            return a.Get(p, param) + (b.Get(p, param) - a.Get(p, param)) * (p.X - Math.Floor(p.X));
+            return a + (b - a) * (p.X - Math.Floor(p.X));
         }
     }
     public class MirroredGradient : Pattern
     {
-        Pattern a, b;
-        public MirroredGradient(in Pattern a, in Pattern b)
+        public MirroredGradient(in Color a, in Color b)
         {
             this.a = a;
             this.b = b; 
@@ -146,30 +157,28 @@ namespace RayTracingCS
         public override Color Get(in Point p, params double[] param)
         {
             if(Math.Abs(p.X - Math.Floor(p.X)) < 0.5)
-                return a.Get(p, param) + (b.Get(p, param) - a.Get(p, param)) * (2 * p.X - Math.Floor(2 * p.X));
-            else
-                return b.Get(p, param) + (a.Get(p, param) - b.Get(p, param)) * (2 * p.X - Math.Floor(2 * p.X));
+                return a + (b - a) * (2 * p.X - Math.Floor(2 * p.X));
+            else         
+                return b + (a - b) * (2 * p.X - Math.Floor(2 * p.X));
         }
     }
     public class RingPattern : Pattern
     {
-        Pattern a, b;
-        public RingPattern(in Pattern a, in Pattern b)
+        public RingPattern(in Color a, in Color b)
         {
             this.a = a;
             this.b = b;
         }
         public override Color Get(in Point p, params double[] param)
         {
-            return Math.Floor(Math.Sqrt(p.X * p.X + p.Z * p.Z)) % 2 == 0 ? a.Get(p, param) : b.Get(p, param);
+            return Math.Floor(Math.Sqrt(p.X * p.X + p.Z * p.Z)) % 2 == 0 ? a : b;
         }
     }
 
 
     public class CheckeredPattern : Pattern
     {
-        Pattern a, b;
-        public CheckeredPattern(in Pattern a, in Pattern b)
+        public CheckeredPattern(in Color a, in Color b)
         {
             this.a = a;
             this.b = b;
@@ -177,13 +186,12 @@ namespace RayTracingCS
         public override Color Get(in Point p, params double[] param)
         {
             Point blend = Transformation.Inversed() * p;
-            return (Math.Floor(blend.X) + Math.Floor(blend.Y) + Math.Floor(blend.Z)) % 2 == 0 ? a.Get(blend, param) : b.Get(blend, param);
+            return (Math.Floor(blend.X) + Math.Floor(blend.Y) + Math.Floor(blend.Z)) % 2 == 0 ? a : b;
         }
     }
     public class Checkered2DPattern : Pattern
     {
-        Pattern a, b;
-        public Checkered2DPattern(in Pattern a, in Pattern b)
+        public Checkered2DPattern(in Color a, in Color b)
         {
             this.a = a;
             this.b = b;
@@ -191,14 +199,14 @@ namespace RayTracingCS
         public override Color Get(in Point p, params double[] param)
         {
             Point blend = Transformation.Inversed() * p;
-            return (Math.Floor(blend.X) + Math.Floor(blend.Z)) % 2 == 0 ? a.Get(blend, param) : b.Get(blend, param);
+            return (Math.Floor(blend.X) + Math.Floor(blend.Z)) % 2 == 0 ? a : b;
         }
     }
 
     public class RadialGradientPattern : Pattern
     {
-        Pattern a, b;
-        public RadialGradientPattern(in Pattern a, in Pattern b)
+
+        public RadialGradientPattern(in Color a, in Color b)
         {
             this.a = a;
             this.b = b;
@@ -206,15 +214,9 @@ namespace RayTracingCS
         public override Color Get(in Point p, params double[] param)
         {
             double dist = Math.Sqrt(p.X * p.X + p.Z * p.Z);
-            return a.Get(p, param) + (b.Get(p, param) - a.Get(p, param)) * (dist - Math.Floor(dist));
+            return a + (b - a) * (dist - Math.Floor(dist));
         }
     }
-
-
-
-
-
-
 
     public class NestedPattern : Pattern
     {

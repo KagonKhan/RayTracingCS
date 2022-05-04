@@ -759,6 +759,27 @@ namespace RayTracingCS.UnitTests
 
 
             //The default material
+            Assert.Equal(new Material(), s.material);
+
+            // Assigning materials
+            var m = new Material();
+            m.ambient = 1;
+            s.material = m;
+            Assert.Equal(m, s.material);
+        }
+
+        [Fact]
+        public void PlaneTests()
+        {
+            // The normal of a plane is constant everywhere
+            var p = new Plane();
+            var n1 = p.NormalAt(new Point(0, 0, 0));
+            var n2 = p.NormalAt(new Point(10, 0, -10));
+            var n3 = p.NormalAt(new Point(-5, 0, 150));
+
+            Assert.Equal(new Vector(0, 1, 0), n1);
+            Assert.Equal(new Vector(0, 1, 0), n2);
+            Assert.Equal(new Vector(0, 1, 0), n3);
         }
     }
 
@@ -995,6 +1016,162 @@ namespace RayTracingCS.UnitTests
         }
     }
 
+
+
+    public class IntersectionTests
+    {
+        [Fact]
+        public void TransformedTests()
+        {
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var s = new TestObject();
+            s.Transformation = Mat4.I.Scaled(2, 2, 2);
+            s.IntersectionsWith(r);
+
+
+            //Intersecting a scaled shape with a ray
+            Assert.Equal(new Point(0, 0, -2.5), s.saved_ray.origin);
+            Assert.Equal(new Vector(0, 0, 0.5), s.saved_ray.direction);
+
+            //Intersecting a translated shape with a ray
+            s.Transformation = Mat4.I.Translated(5, 0, 0);
+            s.IntersectionsWith(r);
+            Assert.Equal(new Point(-5, 0, -5), s.saved_ray.origin);
+            Assert.Equal(new Vector(0, 0, 1), s.saved_ray.direction);
+
+
+            //Computing the normal on a translated shape
+            s.Transformation = Mat4.I.Translated(0, 1, 0);
+            var n = s.NormalAt(new Point(0, 1.70711, -0.70711));
+            Assert.Equal(new Vector(0, 0.70711, -0.70711), n);
+
+
+
+            double s22 = Math.PI / 2.0;
+            
+            //Computing the normal on a transformed shape
+            s.Transformation = Mat4.I.Scaled(1, 0.5, 1).RotatedZ(Math.PI/5);
+            n = s.NormalAt(new Point(0, s22, -s22));
+            Assert.Equal(new Vector(0, 0.97014, -0.24254), n);
+        }
+
+
+        public void PlaneIntersectionTests()
+        {
+            // Intersect with a ray parallel to the plane
+            var p = new Plane();
+            var r = new Ray(new Point(0, 10, 0), new Vector(0, 0, 1));
+            var xs = p.IntersectionsWith(r);
+            Assert.Empty(xs);
+
+            // Intersect with a coplanar ray
+            r = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
+            xs = p.IntersectionsWith(r);
+            Assert.Empty(xs);
+
+
+            // A ray intersecting a plane from above
+            r = new Ray(new Point(0, 1, 0), new Vector(0, -1, 0));
+            xs = p.IntersectionsWith(r);
+            Assert.Single(xs);
+            Assert.Equal(1, xs[0].t);
+            Assert.Equal(p, xs[0].obj);
+
+
+            // A ray intersecting a plane from below
+            r = new Ray(new Point(0, -1, 0), new Vector(0, 1, 0));
+            xs = p.IntersectionsWith(r);
+            Assert.Single(xs);
+            Assert.Equal(1, xs[0].t);
+            Assert.Equal(p, xs[0].obj);
+
+        }
+
+    }
+
+
+    public class PatternTests
+    {
+
+        Color black = Color.Black;
+        Color white = Color.White;
+
+        [Fact]
+        public void CreationTests()
+        {
+            var pat = new StripePattern(black, white);
+            Assert.Equal(black, pat.a);
+            Assert.Equal(white, pat.b);
+        }
+        [Fact]
+        public void StripePatternTests()
+        {
+            // A stripe pattern is constant in y
+            var pattern = new StripePattern(white, black);
+            Assert.Equal(white, pattern.Get(new Point(0, 0, 0)));
+            Assert.Equal(white, pattern.Get(new Point(0, 1, 0)));
+            Assert.Equal(white, pattern.Get(new Point(0, 2, 0)));
+
+
+            // A stripe pattern is constant in z
+            Assert.Equal(white, pattern.Get(new Point(0, 0, 0)));
+            Assert.Equal(white, pattern.Get(new Point(0, 0, 1)));
+            Assert.Equal(white, pattern.Get(new Point(0, 0, 2)));
+
+            // A stripe pattern alternates in x
+            Assert.Equal(white, pattern.Get(new Point( 0.0, 0, 0)));
+            Assert.Equal(white, pattern.Get(new Point( 0.9, 0, 0)));
+            Assert.Equal(black, pattern.Get(new Point( 1.0, 0, 0)));
+            Assert.Equal(black, pattern.Get(new Point(-0.1, 0, 0)));
+            Assert.Equal(black, pattern.Get(new Point(-1.0, 0, 0)));
+            Assert.Equal(white, pattern.Get(new Point(-1.1, 0, 0)));
+
+        }
+
+        [Fact]
+        public void StripePatternLightingTests()
+        {
+            // Lighting with a pattern applied
+            var m = new Material();
+            m.pattern = new StripePattern(white, black);
+            m.ambient = 1;
+            m.diffuse = 0;
+            m.specular = 0;
+            var eyev = new Vector(0, 0, -1);
+            var normalv  = new Vector(0, 0, -1);
+            var light = new PointLight(new Point(0, 0, -10), new Color(1, 1, 1));
+            var c1 = light.Lighting(m, new Plane(), new Point(0.9, 0, 0), eyev, normalv, false);
+            var c2 = light.Lighting(m, new Plane(), new Point(1.1, 0, 0), eyev, normalv, false);
+
+            Assert.Equal(white, c1);
+            Assert.Equal(black, c2);
+
+        }
+
+        [Fact]
+        public void TransformedStripePatternTests()
+        {
+            // Stripes with an object transformation
+            var s = new Sphere();
+            s.Transformation = Mat4.I.Scaled(2, 2, 2);
+            var pattern = new StripePattern(white, black);
+            var c = pattern.GetOnObject(new Point(1.5, 0, 0), s);
+            Assert.Equal(white, c);
+
+
+            // Stripes with a pattern transformation
+            pattern.Transformation = Mat4.I.Scaled(2, 2, 2);
+            c = pattern.GetOnObject(new Point(1.5, 0, 0), s);
+            Assert.Equal(white, c);
+
+
+            // Stripes with both an object and a pattern transformation
+            pattern.Transformation = Mat4.I.Translated(0.5, 0, 0);
+            c = pattern.GetOnObject(new Point(2.5, 0, 0), s);
+            Assert.Equal(white, c);    
+        
+        }
+    }
 }
 
 

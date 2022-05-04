@@ -42,7 +42,29 @@ namespace RayTracingCS
         }
     }
 
-  
+    public class TestObject : HitObject
+    {
+
+        public Ray saved_ray;
+
+        public TestObject() : base() { }
+
+        protected override List<Intersection> LocalIntersectionsWith(in Ray ray)
+        {
+
+            saved_ray = ray;
+            return new List<Intersection>();
+        }
+
+        protected override Vector LocalNormalAt(in Point p)
+        {
+            Vector norm = (p - new Point(0, 0, 0));
+            // careful for w != 0
+            return norm.Normalized();
+        }
+    }
+
+
     public class Sphere : HitObject
     {
 

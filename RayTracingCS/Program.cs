@@ -19,7 +19,7 @@ namespace RayTracingCS
         static public void InitRealTime(int width, int height)
         {
             var wall_material = new Material();
-            wall_material.pattern = new StripePattern(new SolidColorPattern(0.45, 0.45, 0.45), new SolidColorPattern(0.55, 0.55, 0.55));
+            wall_material.pattern = new StripePattern(new Color(0.45, 0.45, 0.45), new Color(0.55, 0.55, 0.55));
             wall_material.pattern.Transformation = Mat4.I.RotatedY(1.5708).Scaled(0.25, 0.25, 0.25);
             wall_material.ambient = 0;
             wall_material.diffuse = 0.4f;
@@ -30,14 +30,14 @@ namespace RayTracingCS
             Plane floor = new Plane();
             floor.Transformation = MatMaths.I.RotatedY(0.31415);
             floor.material = new Material();
-            floor.material.pattern = new Checkered2DPattern(new SolidColorPattern(0.35, 0.35, 0.35), new SolidColorPattern(0.65, 0.65, 0.65));
+            floor.material.pattern = new Checkered2DPattern(new Color(0.35, 0.35, 0.35), new Color(0.65, 0.65, 0.65));
             floor.material.specular = 0;
             floor.material.reflective = 0.4;
 
             Plane ceiling = new Plane();
-            ceiling.Transformation = MatMaths.I.Translated(0,5,0);
+            ceiling.Transformation = MatMaths.I.Translated(0, 5, 0);
             ceiling.material = new Material();
-            ceiling.material.color = new Color(0.8, 0.8, 0.8); 
+            ceiling.material.color = new Color(0.8, 0.8, 0.8);
             ceiling.material.ambient = 0.3f;
             ceiling.material.specular = 0;
 
@@ -47,46 +47,42 @@ namespace RayTracingCS
             left_wall.material = wall_material;
 
             Plane right_wall = new Plane();
-            right_wall.Transformation = MatMaths.I.Translated( 5, 0, 0).RotatedY(1.5708).RotatedZ(1.5708);
+            right_wall.Transformation = MatMaths.I.Translated(5, 0, 0).RotatedY(1.5708).RotatedZ(1.5708);
             right_wall.material = wall_material;
-            
+
 
             Plane front_wall = new Plane();
             front_wall.Transformation = MatMaths.I.Translated(0, 0, 5).RotatedX(1.5708);
             front_wall.material = wall_material;
 
             Plane back_wall = new Plane();
-            back_wall.Transformation = MatMaths.I.Translated( 0, 0, -5).RotatedX(1.5708);
+            back_wall.Transformation = MatMaths.I.Translated(0, 0, -5).RotatedX(1.5708);
             back_wall.material = wall_material;
 
 
             Sphere s1 = new Sphere();
-            s1.Transformation = Mat4.I.Translated(4.6, 0.4, 1).Scaled(0.4, 0.4, 0.4) ;
+            s1.Transformation = Mat4.I.Translated(4.6, 0.4, 1).Scaled(0.4, 0.4, 0.4);
             s1.material = new Material();
             s1.material.color = new Color(0.8, 0.5, 0.3);
             s1.material.shininess = 50f;
-            
+
             Sphere s2 = new Sphere();
             s2.Transformation = Mat4.I.Translated(4.7, 0.3, 0.4).Scaled(0.3, 0.3, 0.3);
             s2.material = new Material();
             s2.material.color = new Color(0.9, 0.4, 0.5);
             s2.material.shininess = 50f;
-            
+
             Sphere s3 = new Sphere();
             s3.Transformation = Mat4.I.Translated(-1, 0.5, 4.5).Scaled(0.5, 0.5, 0.5);
             s3.material = new Material();
             s3.material.color = new Color(0.4, 0.9, 0.6);
             s3.material.shininess = 50f;
-                        
+
             Sphere s4 = new Sphere();
             s4.Transformation = Mat4.I.Translated(-1.7, 0.3, 4.7).Scaled(0.3, 0.3, 0.3);
             s4.material = new Material();
             s4.material.color = new Color(0.4, 0.6, 0.9);
             s4.material.shininess = 50f;
-                     
-            
-
-
 
 
             Sphere s5 = new Sphere();
@@ -95,8 +91,6 @@ namespace RayTracingCS
             s5.material.color = new Color(1, 0.3, 0.2);
             s5.material.shininess = 5f;
             s5.material.specular = 0.4f;
-
-            
 
             Sphere s6 = new Sphere();
             s6.Transformation = Mat4.I.Translated(0.6, 0.7, -0.6).Scaled(0.7, 0.7, 0.7);
@@ -124,23 +118,13 @@ namespace RayTracingCS
             s7.material.refraction = 1.5;
 
 
-
-
-
-
-
-
-
-
-
-
-
-            c = new Camera(400, 200, 1.152);
+            c = new Camera(width, height, 1.152);
             c.transform = MatMaths.ViewTransform(new Point(-2.6, 1.5, -3.9), new Point(-0.6, 1, -0.8), new Vector(0, 1, 0));
 
-            w = new World(floor, ceiling, front_wall, left_wall, right_wall, back_wall, s1,s2,s3,s4,s5,s6,s7);
+            w = new World(floor, ceiling, front_wall, left_wall, right_wall, back_wall, s1, s2, s3, s4, s5, s6, s7);
             w.lights.Add(new PointLight(new Point(-4.9, 4.9, -1), new Color(1, 1, 1)));
         }
+
 
         static public Color RenderRealTime()
         {
