@@ -140,11 +140,8 @@ namespace RayTracingCS
             Computations retVal =  new Computations(t, obj, pos, -r.direction, norm, inside);
 
 
-
-
             if (xs == null)
                 return retVal;
-
 
             List<HitObject> containers = new List<HitObject>();
 
@@ -198,7 +195,7 @@ namespace RayTracingCS
     public class World
     {
 
-        const int depth = 0;
+        const int depth = 10;
 
         // Possibly a dictionary with IDs
         public LinkedList<HitObject> objects = new LinkedList<HitObject>();

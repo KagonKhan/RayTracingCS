@@ -11,8 +11,8 @@ namespace RayTracingCS
     {
         public static int currID = 0;
         public int ID;
-        public Material material =   new();
-        public Mat4 Transformation = new(Mat4.I);
+        public Material material    = new();
+        public Mat4 Transformation  = new(Mat4.I);
 
         protected HitObject()
         {

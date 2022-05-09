@@ -29,14 +29,12 @@ namespace RayTracingCS
 
             Plane floor = new Plane();
             floor.Transformation = MatMaths.I.RotatedY(0.31415);
-            floor.material = new Material();
             floor.material.pattern = new Checkered2DPattern(new Color(0.35, 0.35, 0.35), new Color(0.65, 0.65, 0.65));
             floor.material.specular = 0;
             floor.material.reflective = 0.4;
 
             Plane ceiling = new Plane();
             ceiling.Transformation = MatMaths.I.Translated(0, 5, 0);
-            ceiling.material = new Material();
             ceiling.material.color = new Color(0.8, 0.8, 0.8);
             ceiling.material.ambient = 0.3f;
             ceiling.material.specular = 0;
@@ -60,6 +58,7 @@ namespace RayTracingCS
             back_wall.material = wall_material;
 
 
+            #region spheres
             Sphere s1 = new Sphere();
             s1.Transformation = Mat4.I.Translated(4.6, 0.4, 1).Scaled(0.4, 0.4, 0.4);
             s1.material = new Material();
@@ -116,7 +115,7 @@ namespace RayTracingCS
             s7.material.reflective = 0.9;
             s7.material.transparency = 0.9;
             s7.material.refraction = 1.5;
-
+#endregion
 
             c = new Camera(width, height, 1.152);
             c.transform = MatMaths.ViewTransform(new Point(-2.6, 1.5, -3.9), new Point(-0.6, 1, -0.8), new Vector(0, 1, 0));

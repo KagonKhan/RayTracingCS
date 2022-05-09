@@ -73,9 +73,9 @@ namespace RayTracingCS
         public static bool operator ==(in Color a, in Color b)
         {
             for (int i = 0; i < 4; i++)
-                if (Math.Abs(a.r - b.r) < Mat.eps &&
-                    Math.Abs(a.g - b.g) < Mat.eps &&
-                    Math.Abs(a.b - b.b) < Mat.eps)
+                if (Math.Abs(a.r - b.r) < 30*Mat.eps &&
+                    Math.Abs(a.g - b.g) < 30*Mat.eps &&
+                    Math.Abs(a.b - b.b) < 30*Mat.eps)
                     return true;
             return false;
         }

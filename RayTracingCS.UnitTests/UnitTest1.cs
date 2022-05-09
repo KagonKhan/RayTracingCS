@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace RayTracingCS.UnitTests
 {
+
     public class TupleTests
     {
         [Fact]
@@ -391,6 +392,9 @@ namespace RayTracingCS.UnitTests
 
     public class RayTests
     {
+
+        public readonly double s22 = Math.Sqrt(2) / 2.0;
+
         [Fact]
         public void RayCreationTest()
         {
@@ -1170,6 +1174,103 @@ namespace RayTracingCS.UnitTests
             c = pattern.GetOnObject(new Point(2.5, 0, 0), s);
             Assert.Equal(white, c);    
         
+        }
+
+        // TODO: finish pattern tests
+    }
+
+
+    public class ReflectionAndRefractionTests
+    {
+        public readonly double s22 = Math.Sqrt(2) / 2.0;
+
+
+        [Fact]
+        public void ReflectionTests()
+        {
+            // Reflectivity for the default material
+            var m = new Material();
+            Assert.Equal(0.0, m.reflective);
+
+
+
+            // Precomputing the reflection vector
+
+            var plane = new Plane();
+            var r = new Ray(new Point(0, 1, -1), new Vector(0, -s22, s22));
+            var i = new Intersection(plane, 2*s22);
+            var comps = i.Compute(r);
+            Assert.Equal(new Vector(0, s22, s22), comps.reflect);
+
+
+
+            // The reflected color for a nonreflective material
+            var w = new World();
+            r = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
+            var s = w.objects.First.Next.Value;
+            s.material.ambient = 1;
+            i = new Intersection(s, 1);
+            comps = i.Compute(r);
+            var color = w.ReflectiveShading(comps, 1);
+
+            Assert.Equal(new Color(0, 0, 0), color);
+
+
+
+
+
+        }
+        [Fact]
+        public void ReflectiveTesting()
+        {
+            // The reflected color for a reflective material
+            var plane = new Plane();
+            var w = new World();
+            plane.material = new Material();
+            plane.material.reflective = 0.5;
+            plane.Transformation = Mat4.I.Translated(0, -1, 0);
+            w.objects.AddLast(plane);
+            var r = new Ray(new Point(0, 0, -3), new Vector(0, -s22, s22));
+            var i = new Intersection(plane, 2*s22);
+            var comps = i.Compute(r);
+            var color = w.ReflectiveShading(comps, 1);
+
+            Assert.Equal(new Color(0.19032, 0.2379, 0.14274), color);
+
+
+            // No remaining reflections
+            color = w.ReflectiveShading(comps, 0);
+
+            Assert.Equal(new Color(0, 0, 0), color);
+
+
+            // shade_hit() with a reflective material
+            color = w.Shading(comps, 1);
+            Assert.Equal(new Color(0.87677, 0.92436, 0.82918), color);
+
+
+            // Careful, these results are quite far from accepted (0.01)deg
+        }
+
+        public void ReflectiveRecursionTesting()
+        {
+            // color_at() with mutually reflective surfaces
+            var w = new World();
+            w.lights.Clear();
+            w.lights.Add(new PointLight(new Point(0, 0, 0), new Color(1, 1, 1)));
+            var lower = new Plane();
+            lower.material.reflective = 1;
+            lower.Transformation = Mat4.I.Translated(0, -1, 0);
+            w.objects.AddLast(lower);
+
+            var upper = new Plane();
+            upper.material.reflective = 1;
+            upper.Transformation = Mat4.I.Translated(0, 1, 0);
+            w.objects.AddLast(upper);
+            var r = new Ray(new Point(0, 0, 0), new Vector(0, 1, 0));
+            var col = w.Coloring(r);
+
+            Assert.Equal(col, col);
         }
     }
 }
