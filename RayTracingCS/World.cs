@@ -7,9 +7,6 @@ using System.Threading.Tasks;
 namespace RayTracingCS
 {
 
-
-
-
     public struct Ray
     {
         public Point origin;
@@ -26,7 +23,7 @@ namespace RayTracingCS
             return direction * t + origin;
         }
 
-        public Ray Transform(in Mat4 transformation)
+        public Ray Transformed(in Mat4 transformation)
         {
             return new Ray(transformation * origin, transformation * direction);
         }
@@ -90,7 +87,6 @@ namespace RayTracingCS
     {
         public HitObject? obj;
         public double t;
-
         public Intersection(in HitObject obj, double t)
         {
             this.obj = obj;
@@ -125,7 +121,7 @@ namespace RayTracingCS
         public Computations Compute(in Ray r, in List<Intersection> xs = default(List<Intersection>))
         {
 
-            Point pos = r.position(t);
+            Point pos   = r.position(t);
             Vector norm = obj.NormalAt(pos);
             bool inside;
                 
@@ -137,55 +133,41 @@ namespace RayTracingCS
             else
                 inside = false;
 
-            Computations retVal =  new Computations(t, obj, pos, -r.direction, norm, inside);
+            Computations retVal =  new Computations(t, obj, pos, -r.direction.Normalized(), norm.Normalized(), inside);
 
 
+            
             if (xs == null)
                 return retVal;
+
+
 
             List<HitObject> containers = new List<HitObject>();
 
             for (int i = 0; i < xs.Count; i++)
             {
-                Intersection xsi = xs[i];
-
-                if (xsi == Hit(xs))
+                if (this == xs[i])
                 {
                     if(containers.Count == 0)
-                    {
                         retVal.n1 = 1.0;
-                    }
                     else
-                    {
                         retVal.n1 = containers.Last().material.refraction;
-                    }
                 }
 
-                if(containers.Contains(xsi.obj))
-                {
-                    containers.Remove(xsi.obj);
-                }
+                if(containers.Contains(xs[i].obj))
+                    containers.Remove(xs[i].obj);
                 else
-                {
-                    containers.Add(xsi.obj);
-                }
+                    containers.Add(xs[i].obj);
 
-                if (xsi == Hit(xs))
+                if (this == xs[i])
                 {
                     if (containers.Count == 0)
-                    {
                         retVal.n2 = 1.0;
-                    }
                     else
-                    {
                         retVal.n2 = containers.Last().material.refraction;
-                    }
-
                     break;
                 }
             }
-
-
 
             return retVal;
         }
@@ -194,12 +176,11 @@ namespace RayTracingCS
 
     public class World
     {
-
         const int depth = 10;
 
         // Possibly a dictionary with IDs
-        public LinkedList<HitObject> objects = new LinkedList<HitObject>();
-        public List<Light> lights = new List<Light>();
+        public LinkedList<HitObject> objects    = new LinkedList<HitObject>();
+        public List<Light> lights               = new List<Light>();
 
         public World(params HitObject[] objs)
         {
@@ -228,21 +209,15 @@ namespace RayTracingCS
 
         public List<Intersection> Intersect(in Ray r)
         {
-
             List<Intersection> retVal = new List<Intersection>();
-
             foreach (HitObject item in objects)
             {
                 List<Intersection> xs = item.IntersectionsWith(r);
-
                 if (xs.Count != 0)
-                {
                     retVal.AddRange(xs);
-                }
             }
 
             retVal.Sort((Intersection a, Intersection b) => MatMaths.SpaceshipOp(a.t, b.t));
-
             return retVal;
         }
 
@@ -292,22 +267,19 @@ namespace RayTracingCS
                 return new Color(0, 0, 0);
 
 
-
             double ratio = comp.n1 / comp.n2;
             double cos_i = MatMaths.Dot(comp.eye, comp.normal);
-            double sin_2t = ratio * ratio * (1 - cos_i * cos_i);
+            double sin_2t = ratio * ratio * (1.0 - cos_i * cos_i);
 
             if (sin_2t > 1)
                 return new Color(0, 0, 0);
 
-            double cos_t = Math.Sqrt(1 - sin_2t);
-            Vector dir = comp.normal * (ratio * cos_i - cos_t) - comp.normal * ratio;
+            double cos_t = Math.Sqrt(1.0 - sin_2t);
+            Vector dir = comp.normal * (ratio * cos_i - cos_t) - comp.eye * ratio;
 
             Ray ref_ray = new Ray(comp.under_point, dir);
 
             return Coloring(ref_ray, remaining - 1) * comp.obj.material.transparency;
-
-
         }
     
         public Color Coloring(in Ray r, int remaining = depth)

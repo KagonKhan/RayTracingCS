@@ -37,7 +37,10 @@ namespace RayTracingCS
 
         public List<Intersection> IntersectionsWith(in Ray ray)
         {
-            Ray r = ray.Transform(Transformation.Inversed());
+
+
+            Ray r = ray.Transformed(Transformation.Inversed());
+
             return LocalIntersectionsWith(r);
         }
     }
@@ -59,7 +62,7 @@ namespace RayTracingCS
         protected override Vector LocalNormalAt(in Point p)
         {
             Vector norm = (p - new Point(0, 0, 0));
-            // careful for w != 0
+            norm.W=0;
             return norm.Normalized();
         }
     }
@@ -89,8 +92,6 @@ namespace RayTracingCS
                 double t1 = (-b - Math.Sqrt(delta)) / (2 * a);
                 double t2 = (-b + Math.Sqrt(delta)) / (2 * a);
 
-
-                Console.WriteLine(t1 + ", " + t2);
                 return new List<Intersection> { new(this, t1), new(this, t2) };
             }
         }
@@ -99,7 +100,7 @@ namespace RayTracingCS
         protected override Vector LocalNormalAt(in Point p)
         {
             Vector norm = (p - new Point(0, 0, 0));
-            // careful for w != 0
+            norm.W = 0;
             return norm.Normalized();
         }
     }

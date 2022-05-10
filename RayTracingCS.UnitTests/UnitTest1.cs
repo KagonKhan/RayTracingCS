@@ -520,14 +520,14 @@ namespace RayTracingCS.UnitTests
         public void RayTransformsTest()
         {
             var r = new Ray(new Point(1, 2, 3), new Vector(0, 1, 0));
-            var r2 = r.Transform(MatMaths.Translation(3, 4, 5));
+            var r2 = r.Transformed(MatMaths.Translation(3, 4, 5));
 
             Assert.Equal(new Point(4, 6, 8), r2.origin);
             Assert.Equal(new Vector(0, 1, 0), r2.direction);
 
 
 
-            r2 = r.Transform(MatMaths.Scaling(2, 3, 4));
+            r2 = r.Transformed(MatMaths.Scaling(2, 3, 4));
 
             Assert.Equal(new Point(2, 6, 12), r2.origin);
             Assert.Equal(new Vector(0, 3, 0), r2.direction);
@@ -1238,7 +1238,7 @@ namespace RayTracingCS.UnitTests
             Assert.Equal(new Color(0.19032, 0.2379, 0.14274), color);
 
 
-            // No remaining reflections
+            // The reflected color at the maximum recursive depth
             color = w.ReflectiveShading(comps, 0);
 
             Assert.Equal(new Color(0, 0, 0), color);
@@ -1249,9 +1249,10 @@ namespace RayTracingCS.UnitTests
             Assert.Equal(new Color(0.87677, 0.92436, 0.82918), color);
 
 
-            // Careful, these results are quite far from accepted (0.01)deg
+            // Careful, these results are semi far from accepted (0.01)deg
         }
 
+        [Fact]
         public void ReflectiveRecursionTesting()
         {
             // color_at() with mutually reflective surfaces
@@ -1271,6 +1272,169 @@ namespace RayTracingCS.UnitTests
             var col = w.Coloring(r);
 
             Assert.Equal(col, col);
+        }
+
+        [Fact]
+        public void ReflectiveRefractingMaterialTests()
+        {
+            // Transparency and Refractive Index for the default material
+            var m = new Material();
+            Assert.Equal(0.0, m.transparency);
+            Assert.Equal(1.0, m.refraction);
+
+
+            // A helper for producing a sphere with a glassy material
+            var glassA = new Sphere();
+            glassA.material = Material.Glass();
+            Assert.Equal(Mat4.I, glassA.Transformation);
+            Assert.Equal(1.0, glassA.material.transparency);
+            Assert.Equal(1.5, glassA.material.refraction);
+
+
+
+        }
+
+        [Fact]
+        public void N1N2ComputationTests()
+        {
+            // Finding n1 and n2 at various intersections
+            var glassA = new Sphere();
+            glassA.material = Material.Glass();
+            glassA.Transformation = Mat4.I.Scaled(2, 2, 2);
+            var glassB = new Sphere();
+            glassB.material = Material.Glass();
+            glassB.Transformation = Mat4.I.Translated(0, 0, -0.25);
+            glassB.material.refraction = 2.0;
+            var glassC = new Sphere();
+            glassC.material = Material.Glass();
+            glassC.Transformation = Mat4.I.Translated(0, 0, 0.25);
+            glassC.material.refraction = 2.5;
+
+            var r = new Ray(new Point(0, 0, -4), new Vector(0, 0, 1));
+            var xs = new List<Intersection>();
+            xs.Add(new Intersection(glassA, 2.00));
+            xs.Add(new Intersection(glassB, 2.75));
+            xs.Add(new Intersection(glassC, 3.25));
+            xs.Add(new Intersection(glassB, 4.75));
+            xs.Add(new Intersection(glassC, 5.25));
+            xs.Add(new Intersection(glassA, 6.00));
+
+
+            var comps = xs[0].Compute(r, xs);
+            Assert.Equal(1.0, comps.n1);
+            Assert.Equal(1.5, comps.n2);
+
+            comps = xs[1].Compute(r, xs);
+            Assert.Equal(1.5, comps.n1);
+            Assert.Equal(2.0, comps.n2);
+
+            comps = xs[2].Compute(r, xs);
+            Assert.Equal(2.0, comps.n1);
+            Assert.Equal(2.5, comps.n2);
+
+            comps = xs[3].Compute(r, xs);
+            Assert.Equal(2.5, comps.n1);
+            Assert.Equal(2.5, comps.n2);
+
+            comps = xs[4].Compute(r, xs);
+            Assert.Equal(2.5, comps.n1);
+            Assert.Equal(1.5, comps.n2);
+
+            comps = xs[5].Compute(r, xs);
+            Assert.Equal(1.5, comps.n1);
+            Assert.Equal(1.0, comps.n2);
+
+        }
+
+        [Fact]
+        public void UnderPointTests()
+        {
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var s = new Sphere();
+            s.material = Material.Glass();
+            s.Transformation = Mat4.I.Translated(0, 0, 1);
+            var i = new Intersection(s, 5);
+            var xs = s.IntersectionsWith(r);
+            var comps = i.Compute(r, xs);
+
+            Assert.True(comps.under_point.Z > MatMaths.eps/2);
+            Assert.True(comps.point.Z < comps.under_point.Z);
+        }
+
+        [Fact]
+        public void RefractedOpaqueObjectTests()
+        {
+            // The refracted color with an opaque surface
+            var w = new World();
+            var s = w.objects.First.Value;
+            var r = new Ray(new Point(0, 0, -5), new Vector(0, 0, 1));
+            var xs = new List<Intersection>();
+            xs.Add(new Intersection(s, 4));
+            xs.Add(new Intersection(s, 6));
+
+            var comps = xs[0].Compute(r, xs);
+            var c = w.RefractiveShading(comps, 5);
+
+            Assert.Equal(new Color(0, 0, 0), c);
+
+
+            //The refracted color at the maximum recursive depth
+            s.material.transparency = 1.0;
+            s.material.refraction   = 1.5;
+            xs = new List<Intersection>();
+            xs.Add(new Intersection(s, 4));
+            xs.Add(new Intersection(s, 6));
+            comps = xs[0].Compute(r, xs);
+            c = w.RefractiveShading(comps, 0);
+            Assert.Equal(new Color(0, 0, 0), c);
+        }
+
+        [Fact]
+        public void RefractionTests()
+        {
+
+            // The refracted color under total internal reflection
+            var w = new World();
+            var A = w.objects.First.Value;
+            A.material.transparency = 1.0;
+            A.material.refraction   = 1.5;
+
+            var r = new Ray(new Point(0, 0, s22), new Vector(0, 1, 0));
+            var xs = new List<Intersection>();
+            xs.Add(new Intersection(A, -s22));
+            xs.Add(new Intersection(A, s22));
+
+            var comps = xs[1].Compute(r, xs);
+            var c = w.RefractiveShading(comps, 5);
+
+            Assert.Equal(new Color(0, 0, 0), c);
+        }
+
+        [Fact]
+        public void RefractionTests2()
+        {
+            var w = new World();
+            var A = w.objects.First.Value;
+            A.material.ambient = 1.0f;
+            A.material.pattern = new TestPattern();
+
+            // The refracted color with a refracted ray
+            var B = w.objects.First.Next.Value;
+            B.material.transparency = 1.0;
+            B.material.refraction = 1.5;
+
+            var r = new Ray(new Point(0,0,0.1), new Vector(0, 1, 0));
+            var xs = new List<Intersection>();
+            xs.Add(new Intersection(A, -0.9899));
+            xs.Add(new Intersection(B, -0.4899));
+            xs.Add(new Intersection(B,  0.4899));
+            xs.Add(new Intersection(A,  0.9899));
+
+            var comps = xs[2].Compute(r, xs);
+            var c = w.RefractiveShading(comps, 5);
+
+            Assert.Equal(new Color(0, 0.99888, 0.04725), c);
+
         }
     }
 }

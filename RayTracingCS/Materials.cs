@@ -20,6 +20,16 @@ namespace RayTracingCS
         public double transparency;
         public double refraction;
 
+
+        public static Material Glass()
+        {
+            var material = new Material();
+            material.transparency = 1.0;
+            material.refraction = 1.5;
+            return material;
+        }
+
+
         public Material(float amb, float dif, float spe, float shi, in Color col, double reflect = 0.0, double trans = 0.0, double refr = 1.0)
         {
             ambient = amb;
@@ -35,13 +45,18 @@ namespace RayTracingCS
 
         public Material()
         {
-            color = new Color(1, 1, 1);
-            ambient = 0.1f;
-            diffuse = 0.9f;
-            specular = 0.9f;
-            shininess = 200f;
-            pattern = null;
+            color        = new Color(1, 1, 1);
+            ambient      = 0.1f;
+            diffuse      = 0.9f;
+            specular     = 0.9f;
+            shininess    = 200f;
+            pattern      = null;
+            transparency = 0.0;
+            refraction   = 1.0;
         }
+
+        
+
 
         public override bool Equals(object obj)
         {
@@ -98,6 +113,19 @@ namespace RayTracingCS
             Point pat_p = Transformation.Inversed() * obj_p;
 
             return Get(pat_p, param);
+        }
+    }
+
+    public class TestPattern : Pattern
+    {
+        public TestPattern() : base()
+        {
+
+        }
+
+        public override Color Get(in Point point, params double[] param)
+        {
+            return new Color(point.X, point.Y, point.Z);
         }
     }
 

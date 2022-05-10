@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
+
 
 namespace RayTracingCS
 {
@@ -30,7 +32,7 @@ namespace RayTracingCS
             for (int row = 0; row < dim; row++)
             {
                 for (int col = 0; col < dim; col++)
-                    sb.Append(mat[row * dim + col] + " ");
+                    sb.Append(String.Format("{0:0.0000000}", mat[row * dim + col]) + " ");
 
                 sb.Append('\n');
             }
@@ -294,9 +296,7 @@ namespace RayTracingCS
         // Copies original matrix
         public Mat4 Inversed()
         {
-            if (Inversible() == false)
-                ;// throw new Exception();
-
+            
             Mat4 retVal = new Mat4(I);
             Mat4 a      = new Mat4(this);
 
@@ -328,6 +328,23 @@ namespace RayTracingCS
 
             return retVal;
         }
+        public Mat4 InversedV2()
+        {
+            Matrix4x4 source = new Matrix4x4((float)mat[0], (float)mat[1], (float)mat[2], (float)mat[3],
+                                             (float)mat[4], (float)mat[5], (float)mat[6], (float)mat[7],
+                                             (float)mat[8], (float)mat[9], (float)mat[10], (float)mat[11],
+                                             (float)mat[12], (float)mat[13], (float)mat[14], (float)mat[15]);
+
+            Matrix4x4 ret = new();
+            System.Numerics.Matrix4x4.Invert(source, out ret);
+
+            return new Mat4(ret.M11, ret.M12, ret.M13, ret.M14,
+                            ret.M21, ret.M22, ret.M23, ret.M24,
+                            ret.M31, ret.M32, ret.M33, ret.M34,
+                            ret.M41, ret.M42, ret.M43, ret.M44);
+                            
+        }
+
         // Destroys original matrix
         public Mat4 Inverse(bool checkIfProper = false)
         {
