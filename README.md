@@ -29,7 +29,6 @@
 
 Achieved results, in order of progress, from early to current.
 
-
 <table>
     <tr>
         <td>
@@ -75,6 +74,5 @@ Achieved results, in order of progress, from early to current.
         <td>
             <img src="https://github.com/KagonKhan/RayTracingCS/blob/master/examples/9.png?raw=true" alt="example" title="" width="450" />
         </td>
-
     </tr>
 </table>
