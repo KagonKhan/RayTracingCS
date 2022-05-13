@@ -9,6 +9,16 @@ namespace RayTracingCS
 
     public static class MatMaths
     {
+
+        public static double Max(double x, double y, double z)
+        {
+            return x < y ? (y < z ? z : y) : (x < z ? z : x);
+        }
+        public static double Min(double x, double y, double z)
+        {
+            return x > y ? (y > z ? z : y) : (x > z ? z : x);
+        }
+
         public static int SpaceshipOp(double? a, double? b) => a > b ? 1 : a == b ? 0 : -1;
 
 
@@ -155,7 +165,7 @@ namespace RayTracingCS
 
             return new Mat4(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16);
         }
-        public static Point Mult(Mat4 a, Point b)
+        public static Point Mult(in Mat4 a, in Point b)
         {
             double v1 = a[0, 0] * b[0] + a[0, 1] * b[1] + a[0, 2] * b[2] + a[0, 3] * b[3];
             double v2 = a[1, 0] * b[0] + a[1, 1] * b[1] + a[1, 2] * b[2] + a[1, 3] * b[3];
@@ -164,7 +174,7 @@ namespace RayTracingCS
 
             return new Point(v1, v2, v3, v4);
         }
-        public static Vector Mult(Mat4 a, Vector b)
+        public static Vector Mult(in Mat4 a, in Vector b)
         {
             double v1 = a[0, 0] * b[0] + a[0, 1] * b[1] + a[0, 2] * b[2] + a[0, 3] * b[3];
             double v2 = a[1, 0] * b[0] + a[1, 1] * b[1] + a[1, 2] * b[2] + a[1, 3] * b[3];
@@ -219,7 +229,7 @@ namespace RayTracingCS
         {
             return (r + c) % 2 == 0 ? Minor(a, r, c) : -Minor(a, r, c);
         }
-        public static Mat4 Inverse(Mat4 a)
+        public static Mat4 Inverse(in Mat4 a)
         {
             Mat4 retVal = new Mat4(I);
 

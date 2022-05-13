@@ -183,7 +183,10 @@ namespace RayTracingCS
         }
         #endregion
 
-
+        public Point AsAbs()
+        {
+            return new (Math.Abs(val[0]), Math.Abs(val[1]), Math.Abs(val[2]), Math.Abs(val[3]));
+        }
     }
 
     public struct Vector
@@ -328,5 +331,10 @@ namespace RayTracingCS
             return v - norm * 2 * MatMaths.Dot(v, norm);
         }
 
+
+        public Vector AsAbs()
+        {
+            return new (Math.Abs(val[0]), Math.Abs(val[1]), Math.Abs(val[2]), Math.Abs(val[3]));
+        }
     }
 }
