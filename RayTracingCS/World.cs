@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace RayTracingCS
 {
@@ -176,7 +175,7 @@ namespace RayTracingCS
 
     public class World
     {
-        const int depth = 10;
+        const int depth = 7;
 
         // Possibly a dictionary with IDs
         public LinkedList<HitObject> objects    = new LinkedList<HitObject>();
@@ -249,10 +248,8 @@ namespace RayTracingCS
         }
         public Color ReflectiveShading(in Computations comp, int remaining)
         {
-
             if (comp.obj.material.reflective == 0 || remaining <=0)
                 return new Color(0, 0, 0);
-
 
 
             Ray reflect_ray = new Ray(comp.over_point, comp.reflect);
@@ -319,104 +316,4 @@ namespace RayTracingCS
     }
 
 
-    public class Camera
-    {
-        public int width;
-        public int height;
-        public double fov;
-        public Mat4 transform;
-        public double pxsize;
-        public double halfWidth;
-        public double halfHeight;
-
-        public Camera(int w, int h, double fov)
-        {
-            width = w;
-            height = h;
-            this.fov = fov;
-            transform = MatMaths.I;
-
-            double half_view = Math.Tan(fov / 2);
-            double aspect = (double)width / height;
-
-            if (aspect >= 1)
-            {
-                halfWidth = half_view;
-                halfHeight = half_view / aspect;
-            }
-            else
-            {
-                halfWidth = half_view * aspect;
-                halfHeight = half_view;
-            }
-
-            pxsize = 2 * halfWidth / width;
-        }
-
-        public Ray Ray(int row, int col)
-        {
-            double xoffset = (col + 0.5) * pxsize;
-            double yoffset = (row + 0.5) * pxsize;
-
-            double world_x = halfWidth - xoffset;
-            double world_y = halfHeight - yoffset;
-
-            Mat4 camInverse = transform.Inversed();
-
-            Point pixel = camInverse * new Point(world_x, world_y, -1);
-            Point origin = camInverse * new Point(0, 0, 0);
-            Vector dir = (pixel - origin).Normalized();
-
-            return new Ray(origin, dir);
-        }
-
-        public Canvas Render(in World w)
-        {
-            Canvas retVal = new Canvas(height, width);
-
-            Color c; 
-
-            for(int row = 0; row < height; row++)
-                for(int col = 0; col < width; col++)
-                {
-                    Ray r = Ray(row, col);
-                    c = w.Coloring(r);
-
-                    retVal.WritePixel(row, col, c);
-
-                    if ((row * width + col) % 10000 == 0)
-                        Console.WriteLine($"{((row * width + col)/1000)} out of {height * width / 1000}");
-
-                }
-
-
-            return retVal;
-        }
-
-
-        static int row = 0, col = 0;
-        public Color RenderRealTime(in World w)
-        {
-
-            Ray r = Ray(row, col);
-            Color c = w.Coloring(r);
-
-            col++;
-            if(col >= width)
-            {
-                col = 0;
-                row++;
-            }
-
-            return c;
-        }
-        public Color RenderRealTime(int y, int x, in World w)
-        {
-
-            Ray r = Ray(y, x);
-            Color c = w.Coloring(r);
-
-            return c;
-        }
-    }
 }

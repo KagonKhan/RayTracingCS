@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Numerics;
 
 
@@ -428,7 +425,7 @@ namespace RayTracingCS
 
             return this * new Mat4(c, -s, 0, 0,
                                    s,  c, 0, 0,
-                                   0,  0, 0, 0,
+                                   0,  0, 1, 0,
                                    0,  0, 0, 1);
         }
     }

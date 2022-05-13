@@ -968,7 +968,7 @@ namespace RayTracingCS.UnitTests
             Assert.Equal(h, c.width);
             Assert.Equal(v, c.height);
             Assert.Equal(fov, c.fov);
-            Assert.Equal(MatMaths.I, c.transform);
+            Assert.Equal(MatMaths.I, c.Transformation);
 
 
             c = new Camera(200, 125, pi / 2);
@@ -999,7 +999,7 @@ namespace RayTracingCS.UnitTests
 
 
 
-            c.transform = MatMaths.RotationY(pi / 4) * MatMaths.Translation(0, -2, 5);
+            c.Transformation = MatMaths.RotationY(pi / 4) * MatMaths.Translation(0, -2, 5);
             r = c.Ray(50, 100);
             var s22 = Math.Sqrt(2) / 2d;
 
@@ -1013,7 +1013,7 @@ namespace RayTracingCS.UnitTests
         {
             var w = new World();
             var c = new Camera(11,11,Math.PI/2);
-            c.transform = MatMaths.ViewTransform(new Point(0, 0, -5), new Point(0, 0, 0), new Vector(0, 1, 0));
+            c.Transformation = MatMaths.ViewTransform(new Point(0, 0, -5), new Point(0, 0, 0), new Vector(0, 1, 0));
             var image = c.Render(w);
 
             Assert.Equal(new Color(0.38066, 0.47583, 0.2855), image[5, 5]);
