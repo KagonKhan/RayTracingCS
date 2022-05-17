@@ -305,11 +305,11 @@ namespace RayTracingCS
         }
         public void Normalize()
         {
-            double mag = Magnitude();
-            val[0] /= mag;
-            val[1] /= mag;
-            val[2] /= mag;
-            val[3] /= mag;
+            double mag = 1 / Magnitude();
+            val[0] *= mag;
+            val[1] *= mag;
+            val[2] *= mag;
+            val[3] *= mag;
         }
         public double Dot(in Vector b)
         {

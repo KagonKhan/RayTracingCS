@@ -35,8 +35,6 @@ namespace RayTracingCS
 
         public List<Intersection> IntersectionsWith(in Ray ray)
         {
-
-
             Ray r = ray.Transformed(Transformation.Inversed());
 
             return LocalIntersectionsWith(r);
@@ -196,7 +194,7 @@ namespace RayTracingCS
         {
             double a = Math.Pow(ray.direction.X, 2) + Math.Pow(ray.direction.Z, 2);
 
-            if (a < MatMaths.eps)
+            if (Math.Abs(a) < MatMaths.eps)
                 return new();
 
             double b = 2 * ray.origin.X * ray.direction.X +
@@ -268,21 +266,105 @@ namespace RayTracingCS
 
     public class Cone : HitObject
     {
-        public Cone() : base() { }
+        private bool closed;
+        private double ymin;
+        private double ymax;
 
+        public Cone(bool closed = false, double min = double.NegativeInfinity, double max = double.PositiveInfinity) : base()
+        {
+            this.closed = closed;
+            ymin = min;
+            ymax = max;
+        }
         protected override List<Intersection> LocalIntersectionsWith(in Ray ray)
         {
-            if (Math.Abs(ray.direction.Y) < MatMaths.eps)
-                return new List<Intersection>();
+            ray.direction.Normalize();
+            double a = Math.Pow(ray.direction.X, 2) -
+                       Math.Pow(ray.direction.Y, 2) +  
+                       Math.Pow(ray.direction.Z, 2);
 
-            double t = -ray.origin.Y / ray.direction.Y;
+            double b = 2.0 * ray.origin.X * ray.direction.X -
+                       2.0 * ray.origin.Y * ray.direction.Y +
+                       2.0 * ray.origin.Z * ray.direction.Z;
 
-            return new List<Intersection>() { new Intersection(this, t) };
+            double c = Math.Pow(ray.origin.X, 2) -
+                       Math.Pow(ray.origin.Y, 2) +
+                       Math.Pow(ray.origin.Z, 2);
 
+            double d = b*b - 4.0*a*c;
+
+            if (Math.Abs(a) < MatMaths.eps && Math.Abs(b) < MatMaths.eps)
+                return new();
+
+
+
+            if (d < 0)
+                return new();
+
+            if (Math.Abs(a) < MatMaths.eps) {
+                double t = -c / (2*b);
+                return new() {
+                    new(this, t)
+                };
+            }
+            double t0 = (-b - Math.Sqrt(d))/ (2 * a);
+            double t1 = (-b + Math.Sqrt(d))/ (2 * a);
+
+            if (t0 > t1)
+                (t0, t1) = (t1, t0);
+
+            List<Intersection> retVal = new();
+
+            double y0 = ray.origin.Y + t0 * ray.direction.Y;
+            if (ymin < y0 && y0 < ymax)
+                retVal.Add(new(this, t0));
+
+            double y1 = ray.origin.Y + t1 * ray.direction.Y;
+            if (ymin < y1 && y1 < ymax)
+                retVal.Add(new(this, t1));
+
+            IntersectEnds(ray, ref retVal);
+
+
+            return retVal;
         }
         protected override Vector LocalNormalAt(in Point p)
         {
-            return new Vector(0, 1, 0);
+            double dist = Math.Pow(p.X, 2) + Math.Pow(p.Z, 2);
+
+            if (dist < 1 && p.Y >= ymax - MatMaths.eps)
+                return new Vector(0, 1, 0);
+
+            if (dist < 1 && p.Y <= ymin + MatMaths.eps)
+                return new Vector(0, -1, 0);
+
+            double y = Math.Sqrt(Math.Pow(p.X, 2) +  Math.Pow(p.Z, 2));
+
+            return new Vector(p.X, (p.Y <0 ? y: -y), p.Z);
+        }
+
+
+        private bool CheckEnds(in Ray r, double t)
+        {
+            double x = r.origin.X + t * r.direction.X;
+            double y = r.origin.Y + t * r.direction.Y;
+            double z = r.origin.Z + t * r.direction.Z;
+
+            return (Math.Pow(x, 2) + Math.Pow(z, 2)) <= Math.Abs(y);
+        }
+        private void IntersectEnds(in Ray r, ref List<Intersection> xs)
+        {
+            if (!closed || r.direction.Y <= MatMaths.eps)
+                return;
+
+            double t = (ymin - r.origin.Y) / r.direction.Y;
+            if (CheckEnds(r, t))
+                xs.Add(new(this, t));
+
+            t = (ymax - r.origin.Y) / r.direction.Y;
+            if (CheckEnds(r, t))
+                xs.Add(new(this, t));
+
         }
     }
 

@@ -50,8 +50,8 @@ namespace rtWindow
 
         void Initialize()
         {
-            width  = 7680 / 1;
-            height = 4320 / 1;
+            width  = (int)(7680.0 / 16);
+            height = (int)(4320.0 / 16);
 
             RayTracingCS.Program.InitRealTime(width, height);
 

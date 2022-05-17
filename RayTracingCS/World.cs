@@ -175,7 +175,7 @@ namespace RayTracingCS
 
     public class World
     {
-        const int depth = 7;
+        const int depth = 5;
 
         // Possibly a dictionary with IDs
         public LinkedList<HitObject> objects    = new LinkedList<HitObject>();
